@@ -1,0 +1,117 @@
+﻿@using Timesheet.Common
+@using Timesheet.Data
+@using Timesheet.Services
+@rendermode InteractiveServer
+
+@inject CalendarService CalendarService
+
+<div>
+    @if(_hasDate)
+    {
+        <table height="1px;">
+            <tr>
+                <td style="vertical-align: top;">
+                    <table height="100%">
+                        <tr>
+                            <th>KW</th>
+                        </tr>
+                        <tr>
+                            <td rowspan="6"><FluentLabel>@_weekNumber</FluentLabel></td>
+                        </tr>
+                        <tr><td>&nbsp;</td></tr>
+                        <tr><td>&nbsp;</td></tr>
+                        <tr><td>&nbsp;</td></tr>
+                        <tr><td>&nbsp;</td></tr>
+                        <tr><td>&nbsp;</td></tr>
+                    </table>
+                </td>
+                <td>
+                    <DayView Date="@(CalendarService.GetDateForDayOfCalendarWeek(_year, _weekNumber, DayOfWeek.Monday))" ShowCaptions="true" ValueChanged="@GetWeek" />
+                </td>
+                <td>
+                    <DayView Date="@(CalendarService.GetDateForDayOfCalendarWeek(_year, _weekNumber, DayOfWeek.Tuesday))" ValueChanged="@GetWeek" />
+                </td>
+                <td>
+                    <DayView Date="@(CalendarService.GetDateForDayOfCalendarWeek(_year, _weekNumber, DayOfWeek.Wednesday))" ValueChanged="@GetWeek" />
+                </td>
+                <td>
+                    <DayView Date="@(CalendarService.GetDateForDayOfCalendarWeek(_year, _weekNumber, DayOfWeek.Thursday))" ValueChanged="@GetWeek" />
+                </td>
+                <td>
+                    <DayView Date="@(CalendarService.GetDateForDayOfCalendarWeek(_year, _weekNumber, DayOfWeek.Friday))" ValueChanged="@GetWeek" />
+                </td>
+                <td style="vertical-align: top;">
+                    @if(_week != null)
+                    {
+                        <table height="100%">
+                            <tr>
+                                <td>Summe</td>
+                                <td>@_week.TotalWorkingTime.ToString()</td>
+                            </tr>
+                            <tr>
+                                <td>Vor Ort</td>
+                                <td>@_week.TotalWorkingTimeInPresence.ToString() / @(Math.Round(_week.PresenceWorkShare * 100.0 ?? 0, 1)) %</td>
+                            </tr>
+                            <tr>
+                                <td>Mobil</td>
+                                <td>@_week.TotalMobileWork.ToString() / @(Math.Round(_week.MobileWorkShare * 100.0 ?? 0, 1)) %</td>
+                            </tr>
+                        </table>
+                    }
+                </td>
+            </tr>
+        </table>
+    }
+    else
+    {
+        <FluentCard>
+            <FluentLabel Typo="Typography.Subject" Color="@Color.Error">Kein Datum angegeben.</FluentLabel>
+        </FluentCard>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public int? Year { get; set; }
+
+    [Parameter]
+    public int? WeekNumber { get; set; }
+
+    [Parameter]
+    public DateTime? Date { get; set; }
+
+    private int _year;
+    private int _weekNumber;
+    private bool _hasDate = false;
+    private TimesheetWeek? _week;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (Year.HasValue && WeekNumber.HasValue)
+        {
+            _year = Year.Value;
+            _weekNumber = WeekNumber.Value;
+            _hasDate = true;
+        }
+        else if (Date.HasValue)
+        {
+            _year = Date.Value.Year;
+            _weekNumber = CalendarService.GetCalendarWeekForDate(Date.Value);
+            _hasDate = true;
+        }
+        else
+        {
+            _hasDate = false;
+        }
+
+        if(_hasDate)
+        {
+            await GetWeek();
+        }
+    }
+
+    private async Task GetWeek()
+    {
+        _week = await CalendarService.GetTimesheetWeek(_year, _weekNumber);
+    }
+}

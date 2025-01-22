@@ -1,0 +1,19 @@
+﻿@using System.Reflection
+
+<FluentLabel Typo="Typography.Body">Version: @Version</FluentLabel>
+
+@code {
+    private string Version = "n/a";
+
+    protected override void OnInitialized()
+    {
+        try
+        {
+            Version = Assembly.GetExecutingAssembly().GetName().Version.ToString();
+        }
+        catch
+        {
+            Version = "";
+        }
+    }
+}

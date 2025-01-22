@@ -1,0 +1,46 @@
+﻿@page "/calendar"
+@using Timesheet.Common
+@using Timesheet.Data
+@using Timesheet.Services
+@inject CalendarService CalendarService
+
+@rendermode InteractiveServer
+
+<PageTitle>Calendar</PageTitle>
+
+<FluentGrid>
+    <FluentGridItem xs="3">
+        <FluentCard>
+            <FluentCalendar ValueChanged="@SelectedDateChanged" Value="@SelectedDay" />
+        </FluentCard>        
+    </FluentGridItem>
+    <FluentGridItem xs="9">
+        <FluentCard>
+            <FluentLabel>Stats</FluentLabel>
+        </FluentCard>
+    </FluentGridItem>
+    <FluentGridItem xs="12">
+        <FluentCard AreaRestricted="false">
+            @if (SelectedDay != null)
+            {
+                <WeekView Year="@SelectedDay.Value.Year" Date="@SelectedDay" />
+            }
+        </FluentCard>        
+    </FluentGridItem>
+</FluentGrid>
+
+
+@code {
+    private DateTime? SelectedDay = DateTime.Today;
+    //private DateTime PickerDay = DateTime.Today;
+
+    protected override void OnParametersSet()
+    {
+        SelectedDateChanged(SelectedDay);
+    }
+
+    private void SelectedDateChanged(DateTime? date)
+    {
+        SelectedDay = date;
+    }
+}

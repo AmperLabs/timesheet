@@ -1,0 +1,31 @@
+﻿@page "/profile"
+@using Microsoft.AspNetCore.Authorization
+@* @attribute [Authorize] *@
+
+@rendermode InteractiveServer
+
+<AuthorizeView>
+    <Authorized>
+        <p>Hello @Username!</p>
+    </Authorized>
+    <NotAuthorized>
+        <p>Unknown user!</p>
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+    [CascadingParameter]
+    private Task<AuthenticationState>? authenticationState { get; set; }
+
+    private string Username = "";
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (authenticationState is not null)
+        {
+            var state = await authenticationState;
+
+            Username = state?.User?.Identity?.Name ?? string.Empty;
+        }
+    }
+}

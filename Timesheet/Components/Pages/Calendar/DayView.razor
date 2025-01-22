@@ -1,0 +1,162 @@
+﻿@using Microsoft.FluentUI.AspNetCore.Components.Extensions
+@using Timesheet.Common
+@using Timesheet.Data
+@using Timesheet.Services
+@inject CalendarService CalendarService
+
+@rendermode InteractiveServer
+
+@if(_day != null)
+{
+    <table style="@TableStyle">
+        <tr>
+            @if (ShowCaptions)
+            {
+                <th>&nbsp;</th>
+            }
+            <th>@_day.Date.DayOfWeek.ToString()</th>
+        </tr>
+        <tr>
+            @if(ShowCaptions)
+            {
+                <td><FluentLabel>Datum</FluentLabel></td>
+            }
+            <td>
+                @if(IsToday)
+                {
+                    <FluentLabel Weight="FontWeight.Bold" Color="Color.Accent">@_day.Date.ToShortDateString()</FluentLabel>
+                }
+                else
+                {
+                    <FluentLabel>@_day.Date.ToShortDateString()</FluentLabel>
+                }            
+            </td>
+        </tr>
+        <tr>
+            @if (ShowCaptions)
+            {
+                <td><FluentLabel>Anwesenheit</FluentLabel></td>
+            }
+            <td>
+                <FluentSelect TOption="PresenceType"
+                              Items="@PresenceTypes"
+                              OptionValue="@(p => p.GetDisplayName())"
+                              OptionText="@(p => GetPresenceCaption(p))"
+                              @bind-SelectedOption="@(_day.PresenceType)" />
+            </td>
+        </tr>
+        <tr>
+            @if (ShowCaptions)
+            {
+                <td><FluentLabel>Kommen</FluentLabel></td>
+            }
+            <td><FluentTimePicker Placeholder="Kommen" Value="@_day.StartOfWork.ToDateTimeNullable()" ValueChanged="@(e => _day.StartOfWork = e.ToTimeOnlyNullable())" Disabled="@(!_day.IsPresenceWorkAllowed)" /></td>
+        </tr>
+        <tr>
+            @if (ShowCaptions)
+            {
+                <td><FluentLabel>Gehen</FluentLabel></td>
+            }
+            <td><FluentTimePicker Placeholder="Gehen" Value="@_day.EndOfWork.ToDateTimeNullable()" ValueChanged="@(e => _day.EndOfWork = e.ToTimeOnlyNullable())" Disabled="@(!_day.IsPresenceWorkAllowed)" /></td>
+        </tr>
+        <tr>
+            @if (ShowCaptions)
+            {
+                <td><FluentLabel>Mobil</FluentLabel></td>
+            }
+            <td><TimeSpanInput @bind-Duration=_day.MobileWork Disabled="@(!_day.IsMobileWorkAllowed)" /></td>
+        </tr>
+        <tr>
+            @if (ShowCaptions)
+            {
+                <td><FluentLabel>Gesamt</FluentLabel></td>
+            }
+            <td>
+                <TimeSpanInput Duration=_day.TotalWorkingTime ReadOnly="true" />
+                @if(_day.IsMaximumDialyWorkingTimeExceeded.HasValue && _day.IsMaximumDialyWorkingTimeExceeded.Value)
+                {
+                    <FluentIcon Value="@(new Microsoft.FluentUI.AspNetCore.Components.Icons.Filled.Size20.ErrorCircle())" Color="@Color.Error" Title="Maximal Arbeitszeit überschritten" />
+                    @* <FluentBadge Fill="somevalue" BackgroundColor="red" Color="white">Max. working time exceeded!</FluentBadge> *@
+                }
+            </td>
+        </tr>
+        <tr>
+            <td><FluentButton OnClick="@Save" Disabled="@(!_day.IsDirty)">Save</FluentButton></td>
+        </tr>
+    </table>
+}
+else
+{
+    <div style="width: 300px;display: grid; grid-gap: 12px; grid-auto-flow: column;">
+        <FluentProgressRing></FluentProgressRing>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public DateTime Date { get; set; }
+
+    [Parameter]
+    public bool ShowCaptions { get; set; } = false;
+
+    [Parameter]
+    public EventCallback ValueChanged { get; set; }
+
+    private TimesheetDay _day;
+
+    private bool IsToday => Date.IsSameDay(DateTime.Today);
+
+    private string TableStyle => IsToday ? "border: 1px solid var(--accent-fill-rest);" : "border: none";
+
+    private List<PresenceType> PresenceTypes = Enum.GetValues<PresenceType>().ToList();
+
+    private string GetPresenceCaption(PresenceType presence)
+    {
+        switch(presence)
+        {
+            case PresenceType.PresenceOnly:
+                return "Nur vor Ort";
+            case PresenceType.MobilePartly:
+                return "Anteilig Mobil";
+            case PresenceType.MobileOnly:
+                return "Nur Mobil";
+            case PresenceType.Vacation:
+                return "Urlaub";
+            case PresenceType.PublicHoliday:
+                return "Feiertag";
+            case PresenceType.Illness:
+                return "Krank";
+            default:
+                return "";
+        }
+    }
+
+    private async Task Save()
+    {
+        if(_day != null)
+        {
+            await CalendarService.CreateOrUpdateTimesheetDay(_day);
+            _day.ResetDirtyFlag();
+
+            if(ValueChanged.HasDelegate)
+            {
+                await ValueChanged.InvokeAsync();
+            }
+        }
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        var booking = await CalendarService.GetTimesheetDayByDate(Date);
+
+        if(booking != null)
+        {
+            booking.ResetDirtyFlag();
+            _day = booking;
+        }
+        else
+        {
+            _day = TimesheetDay.FromDateTime(Date);
+        }
+    }
+}

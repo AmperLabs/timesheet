@@ -1,0 +1,33 @@
+﻿@using Microsoft.FluentUI.AspNetCore.Components.Extensions
+@using Timesheet.Common
+
+@rendermode InteractiveServer
+
+<FluentTimePicker 
+    Value="@TimeOnlyValue.ToDateTimeNullable()"
+    ValueChanged="@ValueChanged"
+    Disabled="@Disabled"
+    ReadOnly="@ReadOnly" />
+
+@code {
+    [Parameter]
+    public TimeSpan? Duration { get; set; }
+
+    [Parameter]
+    public EventCallback<TimeSpan?> DurationChanged { get; set; }
+
+    [Parameter]
+    public bool ReadOnly { get; set; } = false;
+
+    [Parameter]
+    public bool Disabled { get; set; } = false;
+
+    private TimeOnly? TimeOnlyValue => Duration.HasValue ? TimeOnly.FromTimeSpan(Duration.Value) : null;
+
+    private async Task ValueChanged(DateTime? dateTime)
+    {
+        Duration = dateTime.HasValue ? new TimeSpan(dateTime.Value.Hour, dateTime.Value.Minute, dateTime.Value.Second) : null;
+
+        await DurationChanged.InvokeAsync(Duration);
+    }
+}
