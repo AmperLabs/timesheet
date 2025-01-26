@@ -6,6 +6,7 @@ namespace Timesheet.Data
 {
     public class TimesheetYear
     {
+        public string UserId { get; set; }
         public int Year { get; set; }
 
         public int NumberOfWeeksInYear { get; set; }

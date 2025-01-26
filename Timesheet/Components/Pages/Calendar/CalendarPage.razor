@@ -8,26 +8,37 @@
 
 <PageTitle>Calendar</PageTitle>
 
-<FluentGrid>
-    <FluentGridItem xs="3">
-        <FluentCard>
-            <FluentCalendar ValueChanged="@SelectedDateChanged" Value="@SelectedDay" />
-        </FluentCard>        
-    </FluentGridItem>
-    <FluentGridItem xs="9">
-        <FluentCard>
-            <FluentLabel>Stats</FluentLabel>
-        </FluentCard>
-    </FluentGridItem>
-    <FluentGridItem xs="12">
-        <FluentCard AreaRestricted="false">
-            @if (SelectedDay != null)
-            {
-                <WeekView Year="@SelectedDay.Value.Year" Date="@SelectedDay" />
-            }
-        </FluentCard>        
-    </FluentGridItem>
-</FluentGrid>
+<AuthorizeView>
+    <Authorized>
+        <FluentGrid>
+            <FluentGridItem xs="3">
+                <FluentCard>
+                    <FluentCalendar ValueChanged="@SelectedDateChanged" Value="@SelectedDay" />
+                </FluentCard>
+            </FluentGridItem>
+            <FluentGridItem xs="9">
+                <FluentCard>
+                    <FluentLabel>Stats</FluentLabel>
+                </FluentCard>
+            </FluentGridItem>
+            <FluentGridItem xs="12">
+                <FluentCard AreaRestricted="false">
+                    @if (SelectedDay != null)
+                    {
+                        <WeekView Year="@SelectedDay.Value.Year" Date="@SelectedDay" />
+                    }
+                </FluentCard>
+            </FluentGridItem>
+        </FluentGrid>
+    </Authorized>
+    <NotAuthorized>
+        <FluentLabel>You are not authorized to access the calendar.</FluentLabel>
+    </NotAuthorized>
+</AuthorizeView>
+
+
+
+
 
 
 @code {

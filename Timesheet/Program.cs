@@ -1,6 +1,7 @@
 using Auth0.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.CookiePolicy;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.FluentUI.AspNetCore.Components;
@@ -25,10 +26,12 @@ namespace Timesheet
             {
                 options.Domain = builder.Configuration["Auth0:Domain"];
                 options.ClientId = builder.Configuration["Auth0:ClientId"];
+                options.Scope = "openid profile email";
             });
 
             builder.Services.AddCascadingAuthenticationState();
 
+            builder.Services.AddScoped<UserService>();
             builder.Services.AddScoped<CalendarService>();
 
             var app = builder.Build();
@@ -37,17 +40,12 @@ namespace Timesheet
             if (!app.Environment.IsDevelopment())
             {
                 app.UseExceptionHandler("/Error");
-                //app.UseHttpsRedirection();
-            }
-
-            if (app.Environment.IsDevelopment())
-            {
-                //app.UseHttpsRedirection();
             }
             
             app.UseStaticFiles();
             app.UseAntiforgery();
 
+            // Handled by environment variable in Deployment:
             //app.UseForwardedHeaders(new ForwardedHeadersOptions
             //{
             //    ForwardedHeaders = ForwardedHeaders.XForwardedProto

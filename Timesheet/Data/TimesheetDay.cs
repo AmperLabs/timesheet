@@ -5,6 +5,7 @@ namespace Timesheet.Data
 {
     public class TimesheetDay
     {
+        public string UserId { get; set; }
         public bool IsDirty { get; private set; }
         public void ResetDirtyFlag()
         {

@@ -11,9 +11,9 @@ namespace Timesheet.Services
 {
     public class CalendarService
     {
-        private const string _databaseName = "timesheet-test";
-        private const string _timesheetDaysCollectionName = "days";
-        private const string _timesheetWeeksCollectionName = "weeks";
+        private string _databaseName = "";
+        private string _timesheetDaysCollectionName = "days";
+        private string _timesheetWeeksCollectionName = "weeks";
 
         private MongoClient _client;
         private IMongoDatabase _database;
@@ -22,6 +22,7 @@ namespace Timesheet.Services
         public CalendarService(IConfiguration configuration)
         {
             var connectionString = configuration["MongoDb:ConnectionString"];
+            _databaseName = configuration["MongoDb:DatabaseName"];
 
             MongoClientSettings settings = MongoClientSettings.FromUrl(new MongoUrl(connectionString));
             settings.SslSettings =new SslSettings() { EnabledSslProtocols = SslProtocols.Tls12 };

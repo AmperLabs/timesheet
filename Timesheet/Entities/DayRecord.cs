@@ -5,6 +5,7 @@ namespace Timesheet.Entities
     public class DayRecord
     {
         public string Id { get; set; }
+        public string UserId { get; set; }
         public TimeSpan DailyRegularWorkingTime { get; set; }
         public TimeSpan MaximumDailyWorkingTime { get; set; }
         public DateOnly Date { get; set; }

@@ -1,8 +1,8 @@
-﻿@rendermode InteractiveServer
+﻿@using Timesheet.Common
+@rendermode InteractiveServer
 
 <AuthorizeView>
     <Authorized>
-        <a href="logout">Log out</a>
         <FluentStack HorizontalAlignment="@HorizontalAlignment.End"
                      VerticalAlignment="@VerticalAlignment.Center"
                      Style="height: 48px; padding-inline-end: 10px; ">
@@ -12,14 +12,19 @@
                                OnHeaderButtonClick="OnLogout"
                                FooterLink=""
                                HeaderLabel=""
-                               Initials="BG"
-                               FullName="@Username"
-                               EMail="bill.gates@microsoft.com"
+                               Initials="@Initials"
+                               Image="@Picture"
+                               FullName="@Nickname"
+                               EMail="@Email"
                                PopoverStyle="min-width: 330px;" />
         </FluentStack>
     </Authorized>
     <NotAuthorized>
-        <a href="login">Log in</a>
+        <FluentStack HorizontalAlignment="@HorizontalAlignment.End"
+                     VerticalAlignment="@VerticalAlignment.Center"
+                     Style="height: 48px; padding-inline-end: 10px; ">
+            <FluentButton OnClick="OnLogin">Login</FluentButton>
+        </FluentStack>
     </NotAuthorized>
 </AuthorizeView>
 
@@ -27,7 +32,14 @@
     [CascadingParameter]
     private Task<AuthenticationState>? AuthenticationState { get; set; }
 
+    [Inject]
+    public NavigationManager NavigationManager { get; set; }
+
     private string Username = "";
+    private string? Nickname = "";
+    private string? Email = "";
+    private string? Picture = "";
+    private string Initials = "nn";
 
     protected override async Task OnParametersSetAsync()
     {
@@ -36,11 +48,29 @@
             var state = await AuthenticationState;
 
             Username = state?.User?.Identity?.Name ?? string.Empty;
+            Nickname = state.GetNicknameForAuthenticatedUser();
+            Email = state.GetEmailForAuthenticatedUser();
+            Picture = state.GetPictureForAuthenticatedUser();
+
+            if(!string.IsNullOrEmpty(Email))
+            {
+                var parts = Email.Split("@")[0].Split(".");
+
+                var firstname = parts[0];
+                var lastname = parts[^1];
+
+                Initials = firstname.Substring(0, 1) + lastname.Substring(0, 1);
+            }
         }
     }
 
     private async Task OnLogout()
     {
-        
+        NavigationManager.NavigateTo("logout");
+    }
+
+    private async Task OnLogin()
+    {
+        NavigationManager.NavigateTo("login");
     }
 }
