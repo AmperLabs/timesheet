@@ -71,6 +71,9 @@
 </div>
 
 @code {
+    [CascadingParameter]
+    private Task<AuthenticationState>? authenticationState { get; set; }
+
     [Parameter]
     public int? Year { get; set; }
 

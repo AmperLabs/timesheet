@@ -1,4 +1,5 @@
-﻿using MongoDB.Driver;
+﻿using MongoDB.Bson;
+using MongoDB.Driver;
 using MongoDB.Driver.Linq;
 using System.Globalization;
 using System.Security.Authentication;
@@ -60,6 +61,20 @@ namespace Timesheet.Services
                 return null;
 
             return _mapper.DayRecordToTimesheetDay(record);
+        }
+
+        public async Task<List<TimesheetDay>> GetTimesheetDaysByDateRamge(DateTime dateFrom, DateTime dateTo)
+        {
+            var collection = _database.GetCollection<DayRecord>(_timesheetDaysCollectionName);
+
+            var records = await collection.AsQueryable()
+            .Where(x => x.Date >= DateOnly.FromDateTime(dateFrom) && x.Date <= DateOnly.FromDateTime(dateTo))
+            .ToListAsync();
+
+            if (records == null)
+                return new List<TimesheetDay>();
+
+            return records.Select(x => _mapper.DayRecordToTimesheetDay(x)).OrderBy(x => x.DateTime).ToList();
         }
 
         public async Task<List<TimesheetDay>> GetTimesheetDaysForCalendarweek(int year, int weekNumber)

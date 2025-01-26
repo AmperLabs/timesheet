@@ -93,6 +93,9 @@ else
 }
 
 @code {
+    [CascadingParameter]
+    private Task<AuthenticationState>? authenticationState { get; set; }
+
     [Parameter]
     public DateTime Date { get; set; }
 
@@ -147,6 +150,12 @@ else
 
     protected override async Task OnParametersSetAsync()
     {
+        if (authenticationState is not null)
+        {
+            var state = await authenticationState;
+            var email = state.GetEmailForAuthenticatedUser();
+        }
+
         var booking = await CalendarService.GetTimesheetDayByDate(Date);
 
         if(booking != null)

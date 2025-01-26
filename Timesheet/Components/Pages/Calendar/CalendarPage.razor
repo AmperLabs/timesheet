@@ -2,7 +2,6 @@
 @using Timesheet.Common
 @using Timesheet.Data
 @using Timesheet.Services
-@inject CalendarService CalendarService
 
 @rendermode InteractiveServer
 
@@ -13,7 +12,20 @@
         <FluentGrid>
             <FluentGridItem xs="3">
                 <FluentCard>
-                    <FluentCalendar ValueChanged="@SelectedDateChanged" Value="@SelectedDay" />
+                    <FluentCalendar ValueChanged="@SelectedDateChanged" Value="@SelectedDay" DisabledDateFunc="@DisabledDay">
+                        <DaysTemplate Context="dayContext">
+                            @if (!dayContext.IsInactive && HasBooking(dayContext.Date))
+                            {
+                                <div style="font-weight: bold; background-color: @(GetColorForPresenceType(GetBooking(dayContext.Date).PresenceType));">
+                                    @dayContext.DayNumber
+                                </div>
+                            }
+                            else
+                            {
+                                @dayContext.DayNumber
+                            }
+                        </DaysTemplate>
+                    </FluentCalendar>
                 </FluentCard>
             </FluentGridItem>
             <FluentGridItem xs="9">
@@ -25,7 +37,8 @@
                 <FluentCard AreaRestricted="false">
                     @if (SelectedDay != null)
                     {
-                        <WeekView Year="@SelectedDay.Value.Year" Date="@SelectedDay" />
+                        @* <WeekView Year="@SelectedDay.Value.Year" Date="@SelectedDay" /> *@
+                        <DayView Date="@SelectedDay.Value" />
                     }
                 </FluentCard>
             </FluentGridItem>
@@ -36,22 +49,85 @@
     </NotAuthorized>
 </AuthorizeView>
 
-
-
-
-
-
 @code {
-    private DateTime? SelectedDay = DateTime.Today;
-    //private DateTime PickerDay = DateTime.Today;
+    [CascadingParameter]
+    private Task<AuthenticationState>? authenticationState { get; set; }
 
-    protected override void OnParametersSet()
+    [Inject]
+    public CalendarService CalendarService { get; set; }
+
+    private DateTime? _selectedDay;
+    private DateTime? SelectedDay
     {
-        SelectedDateChanged(SelectedDay);
+        get
+        {
+            return _selectedDay;
+        }
+        set
+        {
+            if(value.HasValue)
+            {
+                _selectedDay = value.Value.DayOfWeek switch
+                {
+                    DayOfWeek.Saturday => value.Value.AddDays(-1),
+                    DayOfWeek.Sunday => value.Value.AddDays(-2),
+                    _ => value.Value
+                };
+            }
+        }
     }
 
-    private void SelectedDateChanged(DateTime? date)
+    private List<TimesheetDay> BookingsInSelectedMonth = new List<TimesheetDay>();
+
+    private bool DisabledDay(DateTime date) => date.DayOfWeek == DayOfWeek.Saturday || date.DayOfWeek == DayOfWeek.Sunday;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        SelectedDay = DateTime.Today;
+        await SelectedDateChanged(SelectedDay);
+    }
+
+    private async Task SelectedDateChanged(DateTime? date)
     {
         SelectedDay = date;
+
+        if(date.HasValue)
+        {
+            var firstDay = new DateTime(date.Value.Year, date.Value.Month, 1);
+            var lastDay = firstDay.AddMonths(1).AddDays(-1);
+
+            BookingsInSelectedMonth = await CalendarService.GetTimesheetDaysByDateRamge(firstDay, lastDay);
+        }
+
+    }
+
+    private bool HasBooking(DateTime date)
+    {
+        return BookingsInSelectedMonth
+            .Where(x => x.Date == DateOnly.FromDateTime(date))
+            .Any();
+    }
+
+    private TimesheetDay? GetBooking(DateTime date)
+    {
+        return BookingsInSelectedMonth
+            .Where(x => x.Date == DateOnly.FromDateTime(date))
+            .FirstOrDefault();
+    }
+
+    private string GetColorForPresenceType(PresenceType presence)
+    {
+        // https://htmlcolorcodes.com/color-chart/
+
+        return presence switch
+        {
+            PresenceType.PresenceOnly => "#8bc34a",
+            PresenceType.MobilePartly => " #4db6ac",
+            PresenceType.MobileOnly => "#00bcd4",
+            PresenceType.Vacation => " #fff59d",
+            PresenceType.PublicHoliday => " #90a4ae",
+            PresenceType.Illness => "#f44336",
+            _ => " #e1bee7"
+        };
     }
 }
