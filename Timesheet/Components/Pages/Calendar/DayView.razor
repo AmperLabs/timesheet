@@ -105,6 +105,8 @@ else
     [Parameter]
     public EventCallback ValueChanged { get; set; }
 
+    private string _currentUserId { get; set; }
+
     private TimesheetDay _day;
 
     private bool IsToday => Date.IsSameDay(DateTime.Today);
@@ -138,7 +140,7 @@ else
     {
         if(_day != null)
         {
-            await CalendarService.CreateOrUpdateTimesheetDay(_day);
+            await CalendarService.CreateOrUpdateTimesheetDay(_day, _currentUserId);
             _day.ResetDirtyFlag();
 
             if(ValueChanged.HasDelegate)
@@ -153,10 +155,10 @@ else
         if (authenticationState is not null)
         {
             var state = await authenticationState;
-            var email = state.GetEmailForAuthenticatedUser();
+            _currentUserId = state.GetEmailForAuthenticatedUser();
         }
 
-        var booking = await CalendarService.GetTimesheetDayByDate(Date);
+        var booking = await CalendarService.GetTimesheetDayByDate(Date, _currentUserId);
 
         if(booking != null)
         {

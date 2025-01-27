@@ -14,14 +14,17 @@ namespace Timesheet.Entities
         public TimeOnly? EndOfWork { get; set; }
         public TimeSpan? MobileWork { get; set; }
 
-        public static string GenerateKey(DateTime date)
+        public static string GenerateKey(DateTime date, string userId)
         {
-            return date.ToString("yyyyMMdd");
+            return GenerateKey(DateOnly.FromDateTime(date), userId);
         }
 
-        public static string GenerateKey(DateOnly date)
+        public static string GenerateKey(DateOnly date, string userId)
         {
-            return date.ToString("yyyyMMdd");
+            var normalizedUserId = userId.NormalizeEmail();
+            var normalizedDate = date.ToString("yyyyMMdd");
+
+            return $"{normalizedUserId}-{normalizedDate}";
         }
     }
 }

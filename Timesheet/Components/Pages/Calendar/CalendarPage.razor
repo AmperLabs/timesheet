@@ -38,7 +38,7 @@
                     @if (SelectedDay != null)
                     {
                         @* <WeekView Year="@SelectedDay.Value.Year" Date="@SelectedDay" /> *@
-                        <DayView Date="@SelectedDay.Value" />
+                        <DayView Date="@SelectedDay.Value" ShowCaptions="true" />
                     }
                 </FluentCard>
             </FluentGridItem>
@@ -81,8 +81,16 @@
 
     private bool DisabledDay(DateTime date) => date.DayOfWeek == DayOfWeek.Saturday || date.DayOfWeek == DayOfWeek.Sunday;
 
+    private string _currentUserId { get; set; }
+
     protected override async Task OnParametersSetAsync()
     {
+        if (authenticationState is not null)
+        {
+            var state = await authenticationState;
+            _currentUserId = state.GetEmailForAuthenticatedUser();
+        }
+
         SelectedDay = DateTime.Today;
         await SelectedDateChanged(SelectedDay);
     }
@@ -96,7 +104,7 @@
             var firstDay = new DateTime(date.Value.Year, date.Value.Month, 1);
             var lastDay = firstDay.AddMonths(1).AddDays(-1);
 
-            BookingsInSelectedMonth = await CalendarService.GetTimesheetDaysByDateRamge(firstDay, lastDay);
+            BookingsInSelectedMonth = await CalendarService.GetTimesheetDaysByDateRange(firstDay, lastDay, _currentUserId);
         }
 
     }
