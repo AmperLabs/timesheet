@@ -38,7 +38,7 @@
                     @if (SelectedDay != null)
                     {
                         @* <WeekView Year="@SelectedDay.Value.Year" Date="@SelectedDay" /> *@
-                        <DayView Date="@SelectedDay.Value" ShowCaptions="true" />
+                        <DayView Date="@SelectedDay.Value" ShowCaptions="true" ValueChanged="OnDayValueChanged" />
                     }
                 </FluentCard>
             </FluentGridItem>
@@ -99,14 +99,23 @@
     {
         SelectedDay = date;
 
-        if(date.HasValue)
+        await LoadBookingsCurrentInMonth();
+    }
+
+    private async Task LoadBookingsCurrentInMonth()
+    {
+        if (SelectedDay.HasValue)
         {
-            var firstDay = new DateTime(date.Value.Year, date.Value.Month, 1);
+            var firstDay = new DateTime(SelectedDay.Value.Year, SelectedDay.Value.Month, 1);
             var lastDay = firstDay.AddMonths(1).AddDays(-1);
 
             BookingsInSelectedMonth = await CalendarService.GetTimesheetDaysByDateRange(firstDay, lastDay, _currentUserId);
         }
+    }
 
+    private async Task OnDayValueChanged()
+    {
+        await LoadBookingsCurrentInMonth();
     }
 
     private bool HasBooking(DateTime date)
