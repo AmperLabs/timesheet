@@ -4,20 +4,25 @@
 
 @rendermode InteractiveServer
 
-<h3>Bunkai Liste</h3>
+<FluentBreadcrumb>
+    <FluentBreadcrumbItem Href="bunkai">
+        Bunkai
+    </FluentBreadcrumbItem>
+</FluentBreadcrumb>
 
-@if(BunkaiList != null)
-{
-    <table>
-        @foreach(var bunkai in BunkaiList)
-        {
-            <tr>
-                <td><a href="/bunkai/@bunkai.KataName">@bunkai.KataName</a></td>
-            </tr>
-        }
-    </table>
-    <FluentButton OnClick="OnAddBunkai" >Add Bunkai</FluentButton>
-}
+<FluentLabel Typo="Typography.PageTitle">Bunkai Liste</FluentLabel>
+
+
+<FluentDataGrid Items="@BunkaiList"
+                TGridItem="Bunkai"
+                HeaderCellAsButtonWithMenu="true">
+    <PropertyColumn Title="Kata" Property="@(c => c.KataName)" Sortable="true" />
+        <TemplateColumn Sortable="true">
+            <a href="bunkai/@context.KataName">@context.KataName</a>
+        </TemplateColumn>
+</FluentDataGrid>
+
+<FluentButton OnClick="OnAddBunkai" >Add Bunkai</FluentButton>
 
 @code {
     [Inject] IDialogService DialogService { get; set; }
@@ -25,7 +30,7 @@
     [Inject]
     public BunkaiService BunkaiService { get; set; }
 
-    private List<Bunkai>? BunkaiList = null;
+    private IQueryable<Bunkai>? BunkaiList = null;
 
     protected override async Task OnParametersSetAsync()
     {
@@ -34,7 +39,7 @@
 
     private async Task LoadBunkaiList()
     {
-        BunkaiList = await BunkaiService.GetAll();
+        BunkaiList = (await BunkaiService.GetAll()).AsQueryable();
     }
 
     private async Task OnAddBunkai()

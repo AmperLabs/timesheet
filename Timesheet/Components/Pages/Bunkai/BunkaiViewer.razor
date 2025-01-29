@@ -5,6 +5,16 @@
 @using Timesheet.Entities
 
 @rendermode InteractiveServer
+<FluentBreadcrumb>
+    <FluentBreadcrumbItem Href="bunkai">
+        Bunkai
+    </FluentBreadcrumbItem>
+    <FluentBreadcrumbItem Href="@($"bunkai/{KataName}")">
+        @KataName
+    </FluentBreadcrumbItem>
+</FluentBreadcrumb>
+
+<FluentLabel Typo="Typography.PageTitle">Bunkai Viewer</FluentLabel>
 
 
 @if(Bunkai == null)
