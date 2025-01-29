@@ -50,6 +50,7 @@ namespace Timesheet.Services
 
             if(string.IsNullOrEmpty(bunkai.Id))
             {
+                bunkai.Id = Guid.NewGuid().ToString();
                 await collection.InsertOneAsync(bunkai);
             }
             else

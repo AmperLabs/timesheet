@@ -1,33 +1,73 @@
-﻿@using Timesheet.Services
+﻿@implements IDialogContentComponent<Bunkai>
+@using Timesheet.Services
 @using Timesheet.Entities
 
-<h3>BunkaiEditor</h3>
+<!-- Header -->
+<FluentDialogHeader ShowDismiss="true">
+    <FluentStack VerticalAlignment="VerticalAlignment.Center">
+        <FluentIcon Value="@(new Icons.Regular.Size24.WindowApps())" />
+        <FluentLabel Typo="Typography.PaneHeader">
+            @Dialog.Instance.Parameters.Title
+        </FluentLabel>
+    </FluentStack>
+</FluentDialogHeader>
 
-<FluentStack>
-    <FluentTextField @bind-Value=KataName Label="Kata Name"></FluentTextField>
+<!-- Body -->
+<FluentDialogBody>
+    <FluentStack Orientation="Orientation.Vertical">
+        <FluentTextField @bind-Value=Content.KataName Label="Kata Name"></FluentTextField>
 
-    <FluentTextArea @bind-Value=KataName Label="Description"></FluentTextArea>
+        <FluentTextArea @bind-Value=Content.Description Label="Description"></FluentTextArea>
+    </FluentStack>
+</FluentDialogBody>
 
-    <FluentButton Disabled="@(!CanSave)" OnClick="@Save">Save</FluentButton>
-</FluentStack>
+<!-- Footer -->
+<FluentDialogFooter>
+    <FluentButton Appearance="Appearance.Accent"
+                  Disabled="@(!CanSave)"
+                  OnClick="@Save">
+        Save
+    </FluentButton>
+    <FluentButton Appearance="Appearance.Neutral"
+                  OnClick="@Cancel">
+        Cancel
+    </FluentButton>
+</FluentDialogFooter>
+
+
 
 @code {
     [Inject]
     public BunkaiService BunkaiService { get; set; }
 
-    private string? KataName;
-    private string? Description;
+    [CascadingParameter]
+    public FluentDialog? Dialog { get; set; }
 
-    private bool CanSave => KataName != null;
+    [Parameter]
+    public Bunkai? Content { get; set; } = default!;
+
+    private bool CanSave => Content?.KataName != null;
+
+    protected override void OnParametersSet()
+    {
+        if(Content == null)
+        {
+            Content = new Bunkai();
+        }
+    }
 
     private async Task Save()
     {
-        var bunkai = new Bunkai
-            {
-                KataName = KataName,
-                Description = Description
-            };
+        if(Content != null)
+        {
+            await BunkaiService.CreateOrUpdate(Content);
+        }
 
-        await BunkaiService.CreateOrUpdate(bunkai);
+        await Dialog.CloseAsync();
+    }
+
+    private async Task Cancel()
+    {
+        await Dialog.CancelAsync();
     }
 }

@@ -6,7 +6,6 @@
 
 @rendermode InteractiveServer
 
-<h3>BunkaiViewer</h3>
 
 @if(Bunkai == null)
 {
@@ -14,9 +13,7 @@
 }
 else
 {
-    <FluentLabel>@Bunkai.KataName</FluentLabel>
-
-    @RenderBunkai()
+    @BunkaiMarkup
 }
 
 @code {
@@ -28,14 +25,13 @@ else
 
     private Bunkai? Bunkai = null;
 
+    private MarkupString BunkaiMarkup;
+
     protected override async Task OnParametersSetAsync()
     {
         Bunkai = await BunkaiService.GetByKataName(KataName);
-    }
 
-    private string RenderBunkai()
-    {
-        var renderer = new MarkdownRenderer();
-        return renderer.Render(Bunkai.Description, false);
+        var html = Markdig.Markdown.ToHtml(Bunkai.Description ?? "");
+        BunkaiMarkup = (MarkupString)html;
     }
 }
