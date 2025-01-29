@@ -15,9 +15,19 @@
 <!-- Body -->
 <FluentDialogBody>
     <FluentStack Orientation="Orientation.Vertical">
-        <FluentTextField @bind-Value=Content.KataName Label="Kata Name"></FluentTextField>
+        <FluentTextField @bind-Value=Content.KataName Label="Kata Name" style="width: 100%;"></FluentTextField>
 
-        <FluentTextArea @bind-Value=Content.Description Label="Description"></FluentTextArea>
+        <FluentTabs ActiveTabId="markdown" style="width: 100%;">
+            <FluentTab Label="Markdown" Id="markdown">
+                <FluentTextArea @bind-Value=Content.Description Label="Description" style="width: 100%;" Resize="TextAreaResize.Vertical" Rows="10"></FluentTextArea>
+            </FluentTab>
+            <FluentTab Label="Preview" Id="preview">
+                <FluentCard style="width: 100%;">
+                    @Preview
+                </FluentCard>
+            </FluentTab>
+        </FluentTabs>        
+               
     </FluentStack>
 </FluentDialogBody>
 
@@ -47,6 +57,8 @@
     public Bunkai? Content { get; set; } = default!;
 
     private bool CanSave => Content?.KataName != null;
+
+    private MarkupString Preview => (MarkupString)Markdig.Markdown.ToHtml(Content.Description ?? "");
 
     protected override void OnParametersSet()
     {
