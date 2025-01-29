@@ -14,7 +14,10 @@
     </FluentBreadcrumbItem>
 </FluentBreadcrumb>
 
-<FluentLabel Typo="Typography.PageTitle">Bunkai Viewer</FluentLabel>
+<FluentStack Orientation="Orientation.Horizontal" HorizontalAlignment="HorizontalAlignment.Start" VerticalAlignment="VerticalAlignment.Bottom" >
+    <FluentLabel Typo="Typography.PageTitle">Bunkai Viewer</FluentLabel>
+    <FluentButton IconEnd="@(new Icons.Regular.Size16.Edit())" Title="Edit" OnClick="@OnEditBunkai" Disabled="@(!CanEdit)" />
+</FluentStack>
 
 
 @if(Bunkai == null)
@@ -28,6 +31,9 @@ else
 
 @code {
     [Inject]
+    IDialogService DialogService { get; set; }
+
+    [Inject]
     public BunkaiService BunkaiService { get; set; }
 
     [Parameter]
@@ -37,11 +43,41 @@ else
 
     private MarkupString BunkaiMarkup;
 
+    private bool CanEdit => Bunkai != null;
+
     protected override async Task OnParametersSetAsync()
+    {
+        await LoadBunkai();
+    }
+
+    private async Task LoadBunkai()
     {
         Bunkai = await BunkaiService.GetByKataName(KataName);
 
         var html = Markdig.Markdown.ToHtml(Bunkai.Description ?? "");
         BunkaiMarkup = (MarkupString)html;
+    }
+
+    private async Task OnEditBunkai()
+    {
+        DialogParameters parameters = new()
+            {
+                Title = $"Edit Bunkai",
+                PrimaryAction = "Save",
+                PrimaryActionEnabled = false,
+                SecondaryAction = "Cancel",
+                Width = "500px",
+                TrapFocus = true,
+                Modal = true,
+                PreventScroll = true
+            };
+
+        IDialogReference dialog = await DialogService.ShowDialogAsync<BunkaiEditor>(Bunkai, parameters);
+        DialogResult? result = await dialog.Result;
+
+        if (!result.Cancelled)
+        {
+            await LoadBunkai();
+        }
     }
 }

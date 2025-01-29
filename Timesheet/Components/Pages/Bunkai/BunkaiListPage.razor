@@ -15,22 +15,30 @@
 
 <FluentDataGrid Items="@BunkaiList"
                 TGridItem="Bunkai"
-                HeaderCellAsButtonWithMenu="true">
-    <PropertyColumn Title="Kata" Property="@(c => c.KataName)" Sortable="true" />
-        <TemplateColumn Sortable="true">
+                HeaderCellAsButtonWithMenu="true"
+                Pagination="@Pagination" >
+    <TemplateColumn Title="Kata" Sortable="true" SortBy="@KataNameSort">
             <a href="bunkai/@context.KataName">@context.KataName</a>
         </TemplateColumn>
 </FluentDataGrid>
 
-<FluentButton OnClick="OnAddBunkai" >Add Bunkai</FluentButton>
+<FluentPaginator State="@Pagination" />
+
+<FluentButton OnClick="OnAddBunkai">Add Bunkai</FluentButton>
 
 @code {
-    [Inject] IDialogService DialogService { get; set; }
+    [Inject]
+    IDialogService DialogService { get; set; }
 
     [Inject]
     public BunkaiService BunkaiService { get; set; }
 
     private IQueryable<Bunkai>? BunkaiList = null;
+
+    private PaginationState Pagination = new PaginationState { ItemsPerPage = 10 };
+
+    private GridSort<Bunkai> KataNameSort = GridSort<Bunkai>
+        .ByAscending(x => x.KataName);
 
     protected override async Task OnParametersSetAsync()
     {
