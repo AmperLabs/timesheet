@@ -1,0 +1,41 @@
+﻿@page "/bunkai/{kataName}"
+
+@using Timesheet.Common
+@using Timesheet.Services
+@using Timesheet.Entities
+
+@rendermode InteractiveServer
+
+<h3>BunkaiViewer</h3>
+
+@if(Bunkai == null)
+{
+    <FluentLabel>Bunkai not found.</FluentLabel>
+}
+else
+{
+    <FluentLabel>@Bunkai.KataName</FluentLabel>
+
+    @RenderBunkai()
+}
+
+@code {
+    [Inject]
+    public BunkaiService BunkaiService { get; set; }
+
+    [Parameter]
+    public string KataName { get; set; }
+
+    private Bunkai? Bunkai = null;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        Bunkai = await BunkaiService.GetByKataName(KataName);
+    }
+
+    private string RenderBunkai()
+    {
+        var renderer = new MarkdownRenderer();
+        return renderer.Render(Bunkai.Description, false);
+    }
+}

@@ -1,0 +1,31 @@
+﻿@page "/bunkai"
+@using Timesheet.Services
+@using Timesheet.Entities
+
+@rendermode InteractiveServer
+
+<h3>BunkaiListPage</h3>
+
+@if(BunkaiList != null)
+{
+    <table>
+        @foreach(var bunkai in BunkaiList)
+        {
+            <tr>
+                <td><a href="/bunkai/@bunkai.KataName">@bunkai.KataName</a></td>
+            </tr>
+        }
+    </table>
+}
+
+@code {
+    [Inject]
+    public BunkaiService BunkaiService { get; set; }
+
+    private List<Bunkai>? BunkaiList = null;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        BunkaiList = await BunkaiService.GetAll();
+    }
+}

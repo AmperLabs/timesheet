@@ -33,6 +33,7 @@ namespace Timesheet
 
             builder.Services.AddScoped<UserService>();
             builder.Services.AddScoped<CalendarService>();
+            builder.Services.AddScoped<BunkaiService>();
 
             var app = builder.Build();
 

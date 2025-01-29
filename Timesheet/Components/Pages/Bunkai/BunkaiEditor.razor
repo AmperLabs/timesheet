@@ -1,0 +1,33 @@
+﻿@using Timesheet.Services
+@using Timesheet.Entities
+
+<h3>BunkaiEditor</h3>
+
+<FluentStack>
+    <FluentTextField @bind-Value=KataName Label="Kata Name"></FluentTextField>
+
+    <FluentTextArea @bind-Value=KataName Label="Description"></FluentTextArea>
+
+    <FluentButton Disabled="@(!CanSave)" OnClick="@Save">Save</FluentButton>
+</FluentStack>
+
+@code {
+    [Inject]
+    public BunkaiService BunkaiService { get; set; }
+
+    private string? KataName;
+    private string? Description;
+
+    private bool CanSave => KataName != null;
+
+    private async Task Save()
+    {
+        var bunkai = new Bunkai
+            {
+                KataName = KataName,
+                Description = Description
+            };
+
+        await BunkaiService.CreateOrUpdate(bunkai);
+    }
+}
