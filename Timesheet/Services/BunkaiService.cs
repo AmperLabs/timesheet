@@ -33,13 +33,24 @@ namespace Timesheet.Services
             return collection.AsQueryable().ToList();
         }
 
+        public async Task<Bunkai?> GetById(string id)
+        {
+            var collection = _database.GetCollection<Bunkai>(_bunkaiCollectionName);
+
+            var record = await collection.AsQueryable()
+                .Where(x => x.Id == id)
+                .FirstOrDefaultAsync();
+
+            return record;
+        }
+
         public async Task<Bunkai?> GetByKataName(string kataName)
         {
             var collection = _database.GetCollection<Bunkai>(_bunkaiCollectionName);
 
             var record = await collection.AsQueryable()
-            .Where(x => x.KataName.ToLower() == kataName.ToLower())
-            .FirstOrDefaultAsync();
+                .Where(x => x.KataName.ToLower() == kataName.ToLower())
+                .FirstOrDefaultAsync();
 
             return record;
         }
@@ -57,6 +68,13 @@ namespace Timesheet.Services
             {
                 await collection.ReplaceOneAsync(x => x.Id == bunkai.Id, bunkai);
             }
+        }
+
+        public async Task DeleteById(string id)
+        {
+            var collection = _database.GetCollection<Bunkai>(_bunkaiCollectionName);
+
+            await collection.DeleteOneAsync(x => x.Id == id);
         }
     }
 }

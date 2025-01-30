@@ -1,5 +1,6 @@
 ﻿@page "/bunkai/{kataName}"
 
+@using Markdig
 @using Timesheet.Common
 @using Timesheet.Services
 @using Timesheet.Entities
@@ -15,15 +16,17 @@
 </FluentBreadcrumb>
 
 <FluentStack Orientation="Orientation.Horizontal" HorizontalAlignment="HorizontalAlignment.SpaceBetween" VerticalAlignment="VerticalAlignment.Bottom" >
-    <FluentLabel Typo="Typography.PageTitle">Bunkai Viewer</FluentLabel>
+    
     <FluentStack Orientation="Orientation.Horizontal" HorizontalAlignment="HorizontalAlignment.End" VerticalAlignment="VerticalAlignment.Bottom">
+        <FluentButton IconEnd="@(new Icons.Regular.Size16.DocumentPdf())" Title="Pdf" OnClick="@ExportToPdf" Disabled="@(!CanEdit)" />
+
         <AuthorizeView Roles="bunkai-editor">
             <Authorized>
                 <FluentButton IconEnd="@(new Icons.Regular.Size16.Edit())" Title="Edit" OnClick="@OnEditBunkai" Disabled="@(!CanEdit)" />
+                <FluentButton IconEnd="@(new Icons.Regular.Size16.Delete())" Title="Edit" OnClick="@OnDeleteBunkai" Disabled="@(!CanEdit)" />
             </Authorized>
         </AuthorizeView>
-        
-        <FluentButton IconEnd="@(new Icons.Regular.Size16.DocumentPdf())" Title="Pdf" OnClick="@ExportToPdf" Disabled="@(!CanEdit)" />
+                
     </FluentStack>    
 </FluentStack>
 
@@ -50,6 +53,9 @@ else
     [Inject]
     public IJSRuntime JS { get; set; }
 
+    [Inject]
+    public NavigationManager NavigationManager { get; set; }
+
     [Parameter]
     public string KataName { get; set; }
 
@@ -68,13 +74,25 @@ else
     {
         Bunkai = await BunkaiService.GetByKataName(KataName);
 
-        var html = Markdig.Markdown.ToHtml(Bunkai.Description ?? "");
+        var pipeline = new MarkdownPipelineBuilder()
+            .UseAutoLinks(new Markdig.Extensions.AutoLinks.AutoLinkOptions { OpenInNewWindow = true })
+            .UseEmphasisExtras()
+            .UseAutoIdentifiers()
+            .UseMediaLinks().Build();
+
+        var html = Markdig.Markdown.ToHtml(Bunkai.Description ?? "", pipeline);
         BunkaiMarkup = (MarkupString)html;
     }
 
     private async Task ExportToPdf()
     {
-        var html = Markdig.Markdown.ToHtml(Bunkai.Description ?? "");
+        var pipeline = new MarkdownPipelineBuilder()
+            .UseAutoLinks(new Markdig.Extensions.AutoLinks.AutoLinkOptions { OpenInNewWindow = true })
+            .UseEmphasisExtras()
+            .UseAutoIdentifiers()
+            .UseMediaLinks().Build();
+
+        var html = Markdig.Markdown.ToHtml(Bunkai.Description ?? "", pipeline);
         var filename = $"{Bunkai.KataName}.pdf";
 
         var stream = await PdfRendererService.RenderPdfFromHtml(html);
@@ -99,12 +117,29 @@ else
                 PreventScroll = true
             };
 
-        IDialogReference dialog = await DialogService.ShowDialogAsync<BunkaiEditor>(Bunkai, parameters);
-        DialogResult? result = await dialog.Result;
+        var dlgRef = await DialogService.ShowDialogAsync<BunkaiEditor>(Bunkai, parameters);
+        var result = await dlgRef.Result;
 
         if (!result.Cancelled)
         {
             await LoadBunkai();
+        }
+    }
+
+    private async Task OnDeleteBunkai()
+    {
+        if (Bunkai == null)
+            return;
+
+        var dlgRef = await DialogService.ShowConfirmationAsync("Bunkai wirklich löschen?", "Ja", "Nein", "Bunkai löschen");
+
+        var result = await dlgRef.Result;
+
+        if(!result.Cancelled)
+        {
+            await BunkaiService.DeleteById(Bunkai.Id);
+
+            NavigationManager.NavigateTo("bunkai");
         }
     }
 }
