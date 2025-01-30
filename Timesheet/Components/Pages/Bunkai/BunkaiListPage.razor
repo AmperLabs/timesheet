@@ -24,7 +24,11 @@
 
 <FluentPaginator State="@Pagination" />
 
-<FluentButton OnClick="OnAddBunkai">Add Bunkai</FluentButton>
+<AuthorizeView Roles="bunkai-editor">
+    <Authorized>
+        <FluentButton OnClick="OnAddBunkai">Add Bunkai</FluentButton>
+    </Authorized>
+</AuthorizeView>
 
 @code {
     [Inject]

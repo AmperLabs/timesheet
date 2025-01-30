@@ -14,9 +14,17 @@
     </FluentBreadcrumbItem>
 </FluentBreadcrumb>
 
-<FluentStack Orientation="Orientation.Horizontal" HorizontalAlignment="HorizontalAlignment.Start" VerticalAlignment="VerticalAlignment.Bottom" >
+<FluentStack Orientation="Orientation.Horizontal" HorizontalAlignment="HorizontalAlignment.SpaceBetween" VerticalAlignment="VerticalAlignment.Bottom" >
     <FluentLabel Typo="Typography.PageTitle">Bunkai Viewer</FluentLabel>
-    <FluentButton IconEnd="@(new Icons.Regular.Size16.Edit())" Title="Edit" OnClick="@OnEditBunkai" Disabled="@(!CanEdit)" />
+    <FluentStack Orientation="Orientation.Horizontal" HorizontalAlignment="HorizontalAlignment.End" VerticalAlignment="VerticalAlignment.Bottom">
+        <AuthorizeView Roles="bunkai-editor">
+            <Authorized>
+                <FluentButton IconEnd="@(new Icons.Regular.Size16.Edit())" Title="Edit" OnClick="@OnEditBunkai" Disabled="@(!CanEdit)" />
+            </Authorized>
+        </AuthorizeView>
+        
+        <FluentButton IconEnd="@(new Icons.Regular.Size16.DocumentPdf())" Title="Pdf" OnClick="@ExportToPdf" Disabled="@(!CanEdit)" />
+    </FluentStack>    
 </FluentStack>
 
 
@@ -35,6 +43,12 @@ else
 
     [Inject]
     public BunkaiService BunkaiService { get; set; }
+
+    [Inject]
+    public PdfRendererService PdfRendererService { get; set; }
+
+    [Inject]
+    public IJSRuntime JS { get; set; }
 
     [Parameter]
     public string KataName { get; set; }
@@ -56,6 +70,18 @@ else
 
         var html = Markdig.Markdown.ToHtml(Bunkai.Description ?? "");
         BunkaiMarkup = (MarkupString)html;
+    }
+
+    private async Task ExportToPdf()
+    {
+        var html = Markdig.Markdown.ToHtml(Bunkai.Description ?? "");
+        var filename = $"{Bunkai.KataName}.pdf";
+
+        var stream = await PdfRendererService.RenderPdfFromHtml(html);
+
+        using var streamRef = new DotNetStreamReference(stream: stream);
+
+        await JS.InvokeVoidAsync("downloadFileFromStream", filename, streamRef);
     }
 
     private async Task OnEditBunkai()

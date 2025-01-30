@@ -34,6 +34,7 @@ namespace Timesheet
             builder.Services.AddScoped<UserService>();
             builder.Services.AddScoped<CalendarService>();
             builder.Services.AddScoped<BunkaiService>();
+            builder.Services.AddSingleton<PdfRendererService>();
 
             var app = builder.Build();
 
