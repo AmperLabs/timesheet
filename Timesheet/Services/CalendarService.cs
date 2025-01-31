@@ -153,29 +153,56 @@ namespace Timesheet.Services
         #endregion
 
         #region Weekly bookings
-        //public async Task<TimesheetWeek> GetTimesheetWeek(int year, int weekNumber)
-        //{
-        //    var days = await GetTimesheetDaysForCalendarweek(year, weekNumber);
+        public async Task<TimesheetWeek?> GetTimesheetWeek(int year, int weekNumber, string userId)
+        {
+            var id = WeekRecord.GenerateKey(year, weekNumber, userId);
 
-        //    var id = WeekRecord.GenerateKey(year, weekNumber);
+            var collection = _database.GetCollection<WeekRecord>(_timesheetWeeksCollectionName);
 
-        //    var collection = _database.GetCollection<WeekRecord>(_timesheetWeeksCollectionName);
+            var record = await collection.AsQueryable()
+            .Where(x => x.Id == id)
+            .FirstOrDefaultAsync();
 
-        //    var record = await collection.AsQueryable()
-        //    .Where(x => x.Id == id)
-        //    .FirstOrDefaultAsync();
+            var week = record == null ? TimesheetWeek.FromCalendarWeek(year, weekNumber) : _mapper.WeekRecordToTimesheetWeek(record);
 
-        //    var week = new TimesheetWeek(year, weekNumber);
+            var from = GetDateForDayOfCalendarWeek(year, weekNumber, DayOfWeek.Monday);
+            var to = GetDateForDayOfCalendarWeek(year, weekNumber, DayOfWeek.Sunday);
 
-        //    if (record != null)
-        //    {
-        //        //week = _mapper.WeekRecordToTimesheetWeek(record);
-        //    }
+            var days = await GetTimesheetDaysByDateRange(from, to, userId);
 
-        //    week.Days = days;
+            week.BookedDays = days ?? new List<TimesheetDay>();
 
-        //    return week;
-        //}
+            return week;
+        }
+
+        public async Task CreateOrUpdateTimesheetWeek(TimesheetWeek timesheetWeek, string userId)
+        {
+            var id = WeekRecord.GenerateKey(timesheetWeek.Year, timesheetWeek.WeekOfYear, userId);
+
+            var record = _mapper.TimesheetWeekToWeekRecord(timesheetWeek);
+            record.Id = id;
+            record.UserId = userId;
+
+            var collection = _database.GetCollection<WeekRecord>(_timesheetWeeksCollectionName);
+
+            if (collection.AsQueryable().Where(x => x.Id == id).Count() > 0)
+            {
+                var result = await collection.ReplaceOneAsync(x => x.Id == id, record);
+            }
+            else
+            {
+                await collection.InsertOneAsync(record);
+            }
+        }
+
+        public async Task DeleteTimesheetDay(int year, int weekNumber, string userId)
+        {
+            var id = WeekRecord.GenerateKey(year, weekNumber, userId);
+
+            var collection = _database.GetCollection<WeekRecord>(_timesheetWeeksCollectionName);
+
+            await collection.DeleteOneAsync(x => x.Id == id);
+        }
         #endregion
 
         #region Yearly bookings

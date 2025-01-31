@@ -30,7 +30,10 @@
             </FluentGridItem>
             <FluentGridItem xs="9">
                 <FluentCard>
-                    <FluentLabel>Stats</FluentLabel>
+                    @if(SelectedDay != null)
+                    {
+                        <WeekView Date="@SelectedDay" />
+                    }
                 </FluentCard>
             </FluentGridItem>
             <FluentGridItem xs="12">

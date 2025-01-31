@@ -45,19 +45,28 @@ namespace Timesheet.Data
             IsDirty = false;
         }
 
-        public TimeSpan TotalWorkingTimeInPresence => TimeSpan.FromSeconds(BookedDays.Where(x => x.WorkingTimeInPresence.HasValue).Select(x => x.WorkingTimeInPresence!.Value.TotalSeconds).Sum());
-        public TimeSpan TotalMobileWork => TimeSpan.FromSeconds(BookedDays.Where(x => x.MobileWork.HasValue).Select(x => x.MobileWork!.Value.TotalSeconds).Sum());
-        public TimeSpan TotalWorkingTime => TimeSpan.FromSeconds(BookedDays.Where(x => x.TotalWorkingTime.HasValue).Select(x => x.TotalWorkingTime!.Value.TotalSeconds).Sum());
-        public TimeSpan OvertimeHours => TimeSpan.FromSeconds(BookedDays.Where(x => x.OvertimeHours.HasValue).Select(x => x.OvertimeHours!.Value.TotalSeconds).Sum());
+        public TimeSpan TotalWorkingTimeInPresence => BookedDays == null ? TimeSpan.Zero : TimeSpan.FromSeconds(BookedDays.Where(x => x.WorkingTimeInPresence.HasValue).Select(x => x.WorkingTimeInPresence!.Value.TotalSeconds).Sum());
+        public TimeSpan TotalMobileWork => BookedDays == null ? TimeSpan.Zero : TimeSpan.FromSeconds(BookedDays.Where(x => x.MobileWork.HasValue).Select(x => x.MobileWork!.Value.TotalSeconds).Sum());
+        public TimeSpan TotalWorkingTime => BookedDays == null ? TimeSpan.Zero : TimeSpan.FromSeconds(BookedDays.Where(x => x.TotalWorkingTime.HasValue).Select(x => x.TotalWorkingTime!.Value.TotalSeconds).Sum());
+        public TimeSpan OvertimeHours => BookedDays == null ? TimeSpan.Zero : TimeSpan.FromSeconds(BookedDays.Where(x => x.OvertimeHours.HasValue).Select(x => x.OvertimeHours!.Value.TotalSeconds).Sum());
         public TimeSpan UnbookedMobileWork => BookedMobileWork.HasValue ? TotalMobileWork - BookedMobileWork.Value : TotalMobileWork;
 
         public double? MobileWorkShare => TotalWorkingTime.TotalSeconds > 0 ? TotalMobileWork.TotalSeconds / TotalWorkingTime.TotalSeconds : null;
         public double? PresenceWorkShare => TotalWorkingTime.TotalSeconds > 0 ? TotalWorkingTimeInPresence.TotalSeconds / TotalWorkingTime.TotalSeconds : null;
 
-        public TimesheetWeek(int year, int weekOfYear)
+        public TimesheetWeek()
         {
-            Year = year;
-            WeekOfYear = weekOfYear;
+            Year = DateTime.Today.Year;
+            WeekOfYear = ISOWeek.GetWeekOfYear(DateTime.Today);
+        }
+
+        public static TimesheetWeek FromCalendarWeek(int year, int weekOfYear)
+        {
+            return new TimesheetWeek
+            {
+                Year = year,
+                WeekOfYear = weekOfYear
+            };
         }
     }
 }

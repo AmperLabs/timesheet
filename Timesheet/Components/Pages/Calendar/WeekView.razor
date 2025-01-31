@@ -5,116 +5,93 @@
 
 @inject CalendarService CalendarService
 
-<div>
-    @if(_hasDate)
-    {
-        <table height="1px;">
-            <tr>
-                <td style="vertical-align: top;">
-                    <table height="100%">
-                        <tr>
-                            <th>KW</th>
-                        </tr>
-                        <tr>
-                            <td rowspan="6"><FluentLabel>@_weekNumber</FluentLabel></td>
-                        </tr>
-                        <tr><td>&nbsp;</td></tr>
-                        <tr><td>&nbsp;</td></tr>
-                        <tr><td>&nbsp;</td></tr>
-                        <tr><td>&nbsp;</td></tr>
-                        <tr><td>&nbsp;</td></tr>
-                    </table>
-                </td>
-                <td>
-                    <DayView Date="@(CalendarService.GetDateForDayOfCalendarWeek(_year, _weekNumber, DayOfWeek.Monday))" ShowCaptions="true" ValueChanged="@GetWeek" />
-                </td>
-                <td>
-                    <DayView Date="@(CalendarService.GetDateForDayOfCalendarWeek(_year, _weekNumber, DayOfWeek.Tuesday))" ValueChanged="@GetWeek" />
-                </td>
-                <td>
-                    <DayView Date="@(CalendarService.GetDateForDayOfCalendarWeek(_year, _weekNumber, DayOfWeek.Wednesday))" ValueChanged="@GetWeek" />
-                </td>
-                <td>
-                    <DayView Date="@(CalendarService.GetDateForDayOfCalendarWeek(_year, _weekNumber, DayOfWeek.Thursday))" ValueChanged="@GetWeek" />
-                </td>
-                <td>
-                    <DayView Date="@(CalendarService.GetDateForDayOfCalendarWeek(_year, _weekNumber, DayOfWeek.Friday))" ValueChanged="@GetWeek" />
-                </td>
-                <td style="vertical-align: top;">
-                    @if(_week != null)
-                    {
-                        <table height="100%">
-                            <tr>
-                                <td>Summe</td>
-                                <td>@_week.TotalWorkingTime.ToString()</td>
-                            </tr>
-                            <tr>
-                                <td>Vor Ort</td>
-                                <td>@_week.TotalWorkingTimeInPresence.ToString() / @(Math.Round(_week.PresenceWorkShare * 100.0 ?? 0, 1)) %</td>
-                            </tr>
-                            <tr>
-                                <td>Mobil</td>
-                                <td>@_week.TotalMobileWork.ToString() / @(Math.Round(_week.MobileWorkShare * 100.0 ?? 0, 1)) %</td>
-                            </tr>
-                        </table>
-                    }
-                </td>
-            </tr>
-        </table>
-    }
-    else
-    {
-        <FluentCard>
-            <FluentLabel Typo="Typography.Subject" Color="@Color.Error">Kein Datum angegeben.</FluentLabel>
-        </FluentCard>
-    }
-</div>
+@if(_week != null)
+{
+    <table>
+        <tr>
+            <td><FluentLabel Typo="Typography.Body" Weight="FontWeight.Bold">Kalenderwoche</FluentLabel></td>
+            <td colspan="2"><FluentLabel Typo="Typography.Body" Weight="FontWeight.Normal">@($"{_year}-{_weekNumber}")</FluentLabel></td>
+        </tr>
+
+        <tr>
+            <td><FluentLabel Typo="Typography.Body" Weight="FontWeight.Bold">Gesamte Arbeitszeit</FluentLabel></td>
+            <td colspan="2"><FluentLabel Typo="Typography.Body" Weight="FontWeight.Normal">@_week.TotalWorkingTime</FluentLabel></td>
+        </tr>
+
+        <tr>
+            <td><FluentLabel Typo="Typography.Body" Weight="FontWeight.Bold">Vor Ort</FluentLabel></td>
+            <td><FluentLabel Typo="Typography.Body" Weight="FontWeight.Normal">@_week.TotalWorkingTimeInPresence</FluentLabel></td>
+            <td><FluentLabel Typo="Typography.Body" Weight="FontWeight.Normal">@_week.PresenceWorkShare</FluentLabel></td>
+        </tr>
+
+        <tr>
+            <td><FluentLabel Typo="Typography.Body" Weight="FontWeight.Bold">Mobilarbeit</FluentLabel></td>
+            <td><FluentLabel Typo="Typography.Body" Weight="FontWeight.Normal">@_week.BookedMobileWork</FluentLabel></td>
+            <td><FluentLabel Typo="Typography.Body" Weight="FontWeight.Normal">@_week.MobileWorkShare</FluentLabel></td>
+        </tr>
+
+
+
+        <tr>
+            <td><FluentLabel Typo="Typography.Body" Weight="FontWeight.Bold">Gebuchte Mobilarbeit</FluentLabel></td>
+            <td colspan="2"><FluentLabel Typo="Typography.Body" Weight="FontWeight.Normal">@_week.BookedMobileWork</FluentLabel></td>
+        </tr>
+
+        <tr>
+            <td><FluentLabel Typo="Typography.Body" Weight="FontWeight.Bold">Ungebuchte Mobilarbeit</FluentLabel></td>
+            <td colspan="2"><FluentLabel Typo="Typography.Body" Weight="FontWeight.Normal">@_week.UnbookedMobileWork</FluentLabel></td>
+        </tr>
+
+        
+        <tr>
+            <td><FluentLabel Typo="Typography.Body" Weight="FontWeight.Bold">Überstunden</FluentLabel></td>
+            <td colspan="2"><FluentLabel Typo="Typography.Body" Weight="FontWeight.Normal">@_week.OvertimeHours</FluentLabel></td>
+        </tr>
+    </table>
+}
 
 @code {
     [CascadingParameter]
     private Task<AuthenticationState>? authenticationState { get; set; }
 
     [Parameter]
-    public int? Year { get; set; }
-
-    [Parameter]
-    public int? WeekNumber { get; set; }
-
-    [Parameter]
     public DateTime? Date { get; set; }
+
+    private string _currentUserId { get; set; }
 
     private int _year;
     private int _weekNumber;
-    private bool _hasDate = false;
     private TimesheetWeek? _week;
 
     protected override async Task OnParametersSetAsync()
     {
-        if (Year.HasValue && WeekNumber.HasValue)
-        {
-            _year = Year.Value;
-            _weekNumber = WeekNumber.Value;
-            _hasDate = true;
-        }
-        else if (Date.HasValue)
+        if (Date.HasValue)
         {
             _year = Date.Value.Year;
             _weekNumber = CalendarService.GetCalendarWeekForDate(Date.Value);
-            _hasDate = true;
+        }
+
+        if (authenticationState is not null)
+        {
+            var state = await authenticationState;
+            _currentUserId = state.GetEmailForAuthenticatedUser();
+        }
+
+        await LoadWeek();
+    }
+
+    private async Task LoadWeek()
+    {
+        var week = await CalendarService.GetTimesheetWeek(_year, _weekNumber, _currentUserId);
+
+        if (week != null)
+        {
+            week.ResetDirtyFlag();
+            _week = week;
         }
         else
         {
-            _hasDate = false;
+            _week = TimesheetWeek.FromCalendarWeek(_year, _weekNumber);
         }
-
-        if(_hasDate)
-        {
-            await GetWeek();
-        }
-    }
-
-    private async Task GetWeek()
-    {
-        //_week = await CalendarService.GetTimesheetWeek(_year, _weekNumber);
     }
 }
