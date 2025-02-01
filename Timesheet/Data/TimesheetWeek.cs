@@ -9,7 +9,7 @@ namespace Timesheet.Data
         public int Year { get; init; }
         public int WeekOfYear { get; init; }
 
-        public List<TimesheetDay> BookedDays { get; set; }
+        public List<TimesheetDay> BookedDays { get; set; } = new List<TimesheetDay>();
 
         private TimeSpan? _bookedMobileWork = null;
         public TimeSpan? BookedMobileWork
@@ -46,7 +46,7 @@ namespace Timesheet.Data
         }
 
         public TimeSpan TotalWorkingTimeInPresence => BookedDays == null ? TimeSpan.Zero : TimeSpan.FromSeconds(BookedDays.Where(x => x.WorkingTimeInPresence.HasValue).Select(x => x.WorkingTimeInPresence!.Value.TotalSeconds).Sum());
-        public TimeSpan TotalMobileWork => BookedDays == null ? TimeSpan.Zero : TimeSpan.FromSeconds(BookedDays.Where(x => x.MobileWork.HasValue).Select(x => x.MobileWork!.Value.TotalSeconds).Sum());
+        public TimeSpan TotalMobileWork => BookedDays == null ? TimeSpan.Zero : TimeSpan.FromSeconds(BookedDays.Where(x => x.MobileWork.HasValue).Select(x => x.MobileWork!.Value.TotalSeconds).Sum() + BookedDays.Where(x => x.PresenceType == PresenceType.MobileOnly).Select(x => x.TotalWorkingTime!.Value.TotalSeconds).Sum() );
         public TimeSpan TotalWorkingTime => BookedDays == null ? TimeSpan.Zero : TimeSpan.FromSeconds(BookedDays.Where(x => x.TotalWorkingTime.HasValue).Select(x => x.TotalWorkingTime!.Value.TotalSeconds).Sum());
         public TimeSpan OvertimeHours => BookedDays == null ? TimeSpan.Zero : TimeSpan.FromSeconds(BookedDays.Where(x => x.OvertimeHours.HasValue).Select(x => x.OvertimeHours!.Value.TotalSeconds).Sum());
         public TimeSpan UnbookedMobileWork => BookedMobileWork.HasValue ? TotalMobileWork - BookedMobileWork.Value : TotalMobileWork;

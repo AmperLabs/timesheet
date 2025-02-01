@@ -90,7 +90,6 @@ namespace Timesheet.Data
 
                 var timeIncludingBreaks = EndOfWork - start;
 
-                // TODO: Pausenabzüge prüfen
                 if(timeIncludingBreaks.HasValue)
                 {
                     if (timeIncludingBreaks < TimeSpan.FromHours(4))
@@ -138,7 +137,70 @@ namespace Timesheet.Data
             }
         }
 
-        public TimeSpan? OvertimeHours => TotalWorkingTime - DailyRegularWorkingTime;
+        public TimeSpan? BreakTime
+        {
+            get
+            {
+                switch (PresenceType)
+                {
+                    case PresenceType.PresenceOnly:
+                    case PresenceType.MobilePartly:
+                        var earliestPossibleStart = new TimeOnly(6, 0, 0);
+                        var start = StartOfWork;
+
+                        if (start.HasValue && start < earliestPossibleStart)
+                            start = earliestPossibleStart;
+
+                        var timeIncludingBreaks = EndOfWork - start;
+                        if(timeIncludingBreaks.HasValue)
+                        {
+                            if (timeIncludingBreaks < TimeSpan.FromHours(4))
+                                return TimeSpan.FromMinutes(15);
+                            else if (timeIncludingBreaks < TimeSpan.FromHours(6))
+                                return TimeSpan.FromMinutes(30);
+                            else
+                                return TimeSpan.FromMinutes(60);
+                        }
+                        else
+                        {
+                            return TimeSpan.Zero;
+                        }                        
+                    case PresenceType.MobileOnly:
+                        return TimeSpan.Zero;
+                    case PresenceType.Vacation:
+                        return TimeSpan.Zero;
+                    case PresenceType.PublicHoliday:
+                        return TimeSpan.Zero;
+                    case PresenceType.Illness:
+                        return TimeSpan.Zero;
+                    default:
+                        return null;
+                }
+            }
+        }
+
+        public TimeSpan? OvertimeHours
+        {
+            get
+            {
+                switch(PresenceType)
+                {
+                    case PresenceType.PresenceOnly:
+                    case PresenceType.MobilePartly:
+                    case PresenceType.MobileOnly:
+                        return TotalWorkingTime - DailyRegularWorkingTime;
+                    case PresenceType.Illness:
+                        return TimeSpan.Zero - DailyRegularWorkingTime;
+                    case PresenceType.Vacation:
+                    case PresenceType.PublicHoliday:
+                        return TimeSpan.Zero;
+                    default:
+                        return TimeSpan.Zero;
+                }
+            }
+        }
+            
+            //=> TotalWorkingTime - DailyRegularWorkingTime;
         public bool? IsMaximumDialyWorkingTimeExceeded => TotalWorkingTime > MaximumDailyWorkingTime;      
 
         public bool IsMobileWorkAllowed
