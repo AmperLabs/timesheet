@@ -1,3 +1,6 @@
+# Usage:
+# .\publish.ps1 -Version 1.3.1
+
 param(
     [Parameter(
         Mandatory,
@@ -6,6 +9,7 @@ param(
     [string]$Version
 )
 
-$Env:ContainerImageTags = $Version + ';latest'
+docker build -t neumanna/timesheet:$Version -t neumanna/timesheet:latest ./Timesheet
 
-dotnet publish /t:PublishContainer -p:Version=$version
+docker push neumanna/timesheet:$Version
+docker push neumanna/timesheet:latest

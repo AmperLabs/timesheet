@@ -9,6 +9,9 @@
     <ContainerRuntimeIdentifier>linux-x64</ContainerRuntimeIdentifier>
     <ContainerRegistry>registry.hub.docker.com</ContainerRegistry>
     <ContainerRepository>neumanna/timesheet</ContainerRepository>
+    <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+
+    <DockerfileRunArguments>-p 5041:8081</DockerfileRunArguments>
   </PropertyGroup>
 
   <ItemGroup>
@@ -16,6 +19,7 @@
     <PackageReference Include="Markdig" Version="0.40.0" />
     <PackageReference Include="Microsoft.FluentUI.AspNetCore.Components" Version="4.11.3" />
     <PackageReference Include="Microsoft.FluentUI.AspNetCore.Components.Icons" Version="4.11.3" />
+    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.20.1" />
     <PackageReference Include="MongoDB.Driver" Version="3.1.0" />
     <PackageReference Include="PuppeteerSharp" Version="20.0.5" />
     <PackageReference Include="Riok.Mapperly" Version="4.1.1" />

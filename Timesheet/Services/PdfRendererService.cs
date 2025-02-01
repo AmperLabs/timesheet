@@ -1,5 +1,7 @@
 ﻿using PuppeteerSharp;
+using PuppeteerSharp.BrowserData;
 using PuppeteerSharp.Media;
+using System.Runtime.InteropServices;
 
 namespace Timesheet.Services
 {
@@ -9,12 +11,28 @@ namespace Timesheet.Services
 
         private async Task<IBrowser> GetBrowser()
         {
+            // https://g3rv4.com/2022/04/creating-pdfs-on-csharp-in-docker
+
             if (_browser == null)
             {
                 try
                 {
-                    await new BrowserFetcher().DownloadAsync();
-                    _browser = await Puppeteer.LaunchAsync(new LaunchOptions { Headless = true });
+                    var launchOptions = new LaunchOptions { Headless = true };
+
+                    var executable = Environment.GetEnvironmentVariable("PUPPETEER_EXECUTABLE_PATH");
+
+                    if(string.IsNullOrEmpty(executable))
+                    {
+                        var fetcher = new BrowserFetcher();
+                        var installedBrowser = await fetcher.DownloadAsync();
+                    }
+                    else
+                    {
+                        launchOptions.ExecutablePath = executable;
+                        launchOptions.Args = new[] { "--no-sandbox" };
+                    }
+
+                    _browser = await Puppeteer.LaunchAsync(launchOptions);
                 }
                 catch (Exception ex)
                 {
@@ -24,8 +42,6 @@ namespace Timesheet.Services
 
             return _browser;
         }
-
-
 
         public async Task<Stream> RenderPdfFromHtml(string html)
         {
