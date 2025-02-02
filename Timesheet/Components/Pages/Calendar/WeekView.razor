@@ -15,37 +15,37 @@
 
         <tr>
             <td><FluentLabel Typo="Typography.Body" Weight="FontWeight.Bold">Gesamte Arbeitszeit</FluentLabel></td>
-            <td colspan="2"><FluentLabel Typo="Typography.Body" Weight="FontWeight.Normal">@_week.TotalWorkingTime</FluentLabel></td>
+            <td colspan="2"><DurationDisplay Duration="@_week.TotalWorkingTime" ReadOnly="true" Style="width: 100%;" /></td>
         </tr>
 
         <tr>
             <td><FluentLabel Typo="Typography.Body" Weight="FontWeight.Bold">Vor Ort</FluentLabel></td>
-            <td><FluentLabel Typo="Typography.Body" Weight="FontWeight.Normal">@_week.TotalWorkingTimeInPresence</FluentLabel></td>
-            <td><FluentLabel Typo="Typography.Body" Weight="FontWeight.Normal">@_week.PresenceWorkShare</FluentLabel></td>
+            <td><DurationDisplay Duration="@_week.TotalWorkingTimeInPresence" ReadOnly="true" Style="width: 100%;" /></td>
+            <td><FluentTextField ReadOnly="true" Appearance="FluentInputAppearance.Filled" Value="@($"{Math.Round(_week.PresenceWorkShare * 100 ?? 0, 1)} %")" ></FluentTextField></td>
         </tr>
 
         <tr>
             <td><FluentLabel Typo="Typography.Body" Weight="FontWeight.Bold">Mobilarbeit</FluentLabel></td>
-            <td><FluentLabel Typo="Typography.Body" Weight="FontWeight.Normal">@_week.BookedMobileWork</FluentLabel></td>
-            <td><FluentLabel Typo="Typography.Body" Weight="FontWeight.Normal">@_week.MobileWorkShare</FluentLabel></td>
+            <td><DurationDisplay Duration="@_week.TotalMobileWork" ReadOnly="true" Style="width: 100%;" /></td>
+            <td><FluentTextField ReadOnly="true" Appearance="FluentInputAppearance.Filled" Value="@($"{Math.Round(_week.MobileWorkShare * 100 ?? 0, 1)} %")"></FluentTextField></td>
         </tr>
 
 
 
         <tr>
             <td><FluentLabel Typo="Typography.Body" Weight="FontWeight.Bold">Gebuchte Mobilarbeit</FluentLabel></td>
-            <td colspan="2"><FluentLabel Typo="Typography.Body" Weight="FontWeight.Normal">@_week.BookedMobileWork</FluentLabel></td>
+            <td colspan="2"><DurationDisplay Duration="@_week.BookedMobileWork" ReadOnly="true" Style="width: 100%;" /></td>
         </tr>
 
         <tr>
             <td><FluentLabel Typo="Typography.Body" Weight="FontWeight.Bold">Ungebuchte Mobilarbeit</FluentLabel></td>
-            <td colspan="2"><FluentLabel Typo="Typography.Body" Weight="FontWeight.Normal">@_week.UnbookedMobileWork</FluentLabel></td>
+            <td colspan="2"><DurationDisplay Duration="@_week.UnbookedMobileWork" ReadOnly="true" Style="width: 100%;" /></td>
         </tr>
 
         
         <tr>
             <td><FluentLabel Typo="Typography.Body" Weight="FontWeight.Bold">Überstunden</FluentLabel></td>
-            <td colspan="2"><FluentLabel Typo="Typography.Body" Weight="FontWeight.Normal">@_week.OvertimeHours</FluentLabel></td>
+            <td colspan="2"><DurationDisplay Duration="@_week.OvertimeHours" ReadOnly="true" Style="width: 100%;" /></td>
         </tr>
     </table>
 }

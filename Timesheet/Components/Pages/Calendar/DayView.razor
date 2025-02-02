@@ -1,4 +1,5 @@
 ﻿@using Microsoft.FluentUI.AspNetCore.Components.Extensions
+@using System.Globalization
 @using Timesheet.Common
 @using Timesheet.Data
 @using Timesheet.Services
@@ -10,78 +11,78 @@
 {
     <table style="@TableStyle">
         <tr>
-            @if (ShowCaptions)
-            {
-                <th>&nbsp;</th>
-            }
-            <th>@_day.Date.DayOfWeek.ToString()</th>
-        </tr>
-        <tr>
-            @if(ShowCaptions)
-            {
-                <td><FluentLabel>Datum</FluentLabel></td>
-            }
+            <td><FluentLabel>Datum</FluentLabel></td>
             <td>
                 @if(IsToday)
                 {
-                    <FluentLabel Weight="FontWeight.Bold" Color="Color.Accent">@_day.Date.ToShortDateString()</FluentLabel>
+                    <FluentLabel Weight="FontWeight.Bold" Color="Color.Accent">@_formattedDate</FluentLabel>
                 }
                 else
                 {
-                    <FluentLabel>@_day.Date.ToShortDateString()</FluentLabel>
+                    <FluentLabel>@_formattedDate</FluentLabel>
                 }            
             </td>
         </tr>
         <tr>
-            @if (ShowCaptions)
-            {
-                <td><FluentLabel>Anwesenheit</FluentLabel></td>
-            }
+            <td><FluentLabel>Anwesenheit</FluentLabel></td>
             <td>
                 <FluentSelect TOption="PresenceType"
                               Items="@PresenceTypes"
                               OptionValue="@(p => p.GetDisplayName())"
                               OptionText="@(p => GetPresenceCaption(p))"
-                              @bind-SelectedOption="@(_day.PresenceType)" />
+                              @bind-SelectedOption="@(_day.PresenceType)"
+                              Style="width: 100%;"/>
             </td>
         </tr>
         <tr>
-            @if (ShowCaptions)
-            {
-                <td><FluentLabel>Kommen</FluentLabel></td>
-            }
-            <td><FluentTimePicker Placeholder="Kommen" Value="@_day.StartOfWork.ToDateTimeNullable()" ValueChanged="@(e => _day.StartOfWork = e.ToTimeOnlyNullable())" Disabled="@(!_day.IsPresenceWorkAllowed)" /></td>
+            <td><FluentLabel>Kommen</FluentLabel></td>
+            <td><FluentTimePicker Placeholder="Kommen" Value="@_day.StartOfWork.ToDateTimeNullable()" ValueChanged="@(e => _day.StartOfWork = e.ToTimeOnlyNullable())" Disabled="@(!_day.IsPresenceWorkAllowed)" Style="width: 100%;" /></td>
         </tr>
         <tr>
-            @if (ShowCaptions)
-            {
-                <td><FluentLabel>Gehen</FluentLabel></td>
-            }
-            <td><FluentTimePicker Placeholder="Gehen" Value="@_day.EndOfWork.ToDateTimeNullable()" ValueChanged="@(e => _day.EndOfWork = e.ToTimeOnlyNullable())" Disabled="@(!_day.IsPresenceWorkAllowed)" /></td>
+            <td><FluentLabel>Gehen</FluentLabel></td>
+            <td><FluentTimePicker Placeholder="Gehen" Value="@_day.EndOfWork.ToDateTimeNullable()" ValueChanged="@(e => _day.EndOfWork = e.ToTimeOnlyNullable())" Disabled="@(!_day.IsPresenceWorkAllowed)" Style="width: 100%;" /></td>
         </tr>
         <tr>
-            @if (ShowCaptions)
-            {
-                <td><FluentLabel>Mobil</FluentLabel></td>
-            }
-            <td><TimeSpanInput @bind-Duration=_day.MobileWork Disabled="@(!_day.IsMobileWorkAllowed)" /></td>
+            <td><FluentLabel>Mobil</FluentLabel></td>
+            <td><TimeSpanInput @bind-Duration=_day.MobileWork Disabled="@(!_day.IsMobileWorkAllowed)" Style="width: 100%;" /></td>
         </tr>
         <tr>
-            @if (ShowCaptions)
-            {
-                <td><FluentLabel>Gesamt</FluentLabel></td>
-            }
+            <td><FluentLabel>Brutto AZ</FluentLabel></td>
             <td>
-                <TimeSpanInput Duration=_day.TotalWorkingTime ReadOnly="true" />
+                <DurationDisplay Duration="_day.GrossWorkingTimeInPresence" ReadOnly="true" Style="width: 100%;" />
+            </td>
+        </tr>
+        <tr>
+            <td><FluentLabel>Pausen</FluentLabel></td>
+            <td>
+                <DurationDisplay Duration="_day.BreakTime" ReadOnly="true" Style="width: 100%;" />
+            </td>
+        </tr>
+        <tr>
+            <td><FluentLabel>Netto AZ</FluentLabel></td>
+            <td>
+                <DurationDisplay Duration="_day.NetWorkingTimeInPresence" ReadOnly="true" Style="width: 100%;" />
+            </td>
+        </tr>
+        <tr>
+            <td><FluentLabel>Gesamt</FluentLabel></td>
+            <td>
+                <DurationDisplay Duration="_day.TotalWorkingTime" ReadOnly="true" Style="width: 100%;" />
                 @if(_day.IsMaximumDialyWorkingTimeExceeded.HasValue && _day.IsMaximumDialyWorkingTimeExceeded.Value)
                 {
                     <FluentIcon Value="@(new Microsoft.FluentUI.AspNetCore.Components.Icons.Filled.Size20.ErrorCircle())" Color="@Color.Error" Title="Maximal Arbeitszeit überschritten" />
-                    @* <FluentBadge Fill="somevalue" BackgroundColor="red" Color="white">Max. working time exceeded!</FluentBadge> *@
                 }
             </td>
         </tr>
         <tr>
-            <td><FluentButton OnClick="@Save" Disabled="@(!_day.IsDirty)">Save</FluentButton></td>
+            <td><FluentLabel>Überstunden</FluentLabel></td>
+            <td>
+                <DurationDisplay Duration="_day.OvertimeHours" ReadOnly="true" Style="width: 100%;" />
+            </td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><FluentButton OnClick="@Save" Disabled="@(!_day.IsDirty)" Style="width: 100%;" >Save</FluentButton></td>
         </tr>
     </table>
 }
@@ -105,9 +106,13 @@ else
     [Parameter]
     public EventCallback ValueChanged { get; set; }
 
+    private CultureInfo _culture = new CultureInfo("de-DE");
+
     private string _currentUserId { get; set; }
 
     private TimesheetDay _day;
+
+    private string? _formattedDate => $"{_day.Date.DayOfWeek.GetDayName(_culture)}, {_day.Date.ToString("d", _culture)}";
 
     private bool IsToday => Date.IsSameDay(DateTime.Today);
 

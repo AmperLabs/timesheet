@@ -1,4 +1,5 @@
 ﻿@page "/calendar"
+@using System.Globalization
 @using Timesheet.Common
 @using Timesheet.Data
 @using Timesheet.Services
@@ -12,7 +13,9 @@
         <FluentGrid>
             <FluentGridItem xs="3">
                 <FluentCard>
-                    <FluentCalendar ValueChanged="@SelectedDateChanged" Value="@SelectedDay" DisabledDateFunc="@DisabledDay">
+                    <CardHeader Title="Kalender" />
+
+                    <FluentCalendar ValueChanged="@SelectedDateChanged" Value="@SelectedDay" DisabledDateFunc="@DisabledDay" Culture="@_culture">
                         <DaysTemplate Context="dayContext">
                             @if (!dayContext.IsInactive && HasBooking(dayContext.Date))
                             {
@@ -28,20 +31,25 @@
                     </FluentCalendar>
                 </FluentCard>
             </FluentGridItem>
-            <FluentGridItem xs="9">
-                <FluentCard>
-                    @if(SelectedDay != null)
-                    {
-                        <WeekView Date="@SelectedDay" />
-                    }
-                </FluentCard>
-            </FluentGridItem>
-            <FluentGridItem xs="12">
+            
+            <FluentGridItem xs="3">
                 <FluentCard AreaRestricted="false">
+                    <CardHeader Title="Tagesdetails" />
+                    
                     @if (SelectedDay != null)
                     {
                         @* <WeekView Year="@SelectedDay.Value.Year" Date="@SelectedDay" /> *@
                         <DayView Date="@SelectedDay.Value" ShowCaptions="true" ValueChanged="OnDayValueChanged" />
+                    }
+                </FluentCard>
+            </FluentGridItem>
+        
+            <FluentGridItem xs="3">
+                <FluentCard>
+                    <CardHeader Title="Wochendetails" />
+                    @if (SelectedDay != null)
+                    {
+                        <WeekView Date="@SelectedDay" />
                     }
                 </FluentCard>
             </FluentGridItem>
@@ -58,6 +66,8 @@
 
     [Inject]
     public CalendarService CalendarService { get; set; }
+
+    private CultureInfo _culture = new CultureInfo("de-DE");
 
     private DateTime? _selectedDay;
     private DateTime? SelectedDay

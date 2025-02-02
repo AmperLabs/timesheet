@@ -3,15 +3,18 @@
 
 @rendermode InteractiveServer
 
-<FluentTimePicker 
-    Value="@TimeOnlyValue.ToDateTimeNullable()"
-    ValueChanged="@ValueChanged"
-    Disabled="@Disabled"
-    ReadOnly="@ReadOnly" />
+<FluentTimePicker Value="@DurationAsDateTime"
+                  ValueChanged="@ValueChanged"
+                  Disabled="@Disabled"
+                  ReadOnly="@ReadOnly"
+                  Style="@Style"/>
 
 @code {
     [Parameter]
     public TimeSpan? Duration { get; set; }
+
+    [Parameter]
+    public string? Style { get; set; }
 
     [Parameter]
     public EventCallback<TimeSpan?> DurationChanged { get; set; }
@@ -22,7 +25,7 @@
     [Parameter]
     public bool Disabled { get; set; } = false;
 
-    private TimeOnly? TimeOnlyValue => Duration.HasValue ? TimeOnly.FromTimeSpan(Duration.Value) : null;
+    private DateTime? DurationAsDateTime => Duration.HasValue ? new DateTime(1, 1, 1, Duration.Value.Hours, Duration.Value.Minutes, Duration.Value.Seconds)  : null;
 
     private async Task ValueChanged(DateTime? dateTime)
     {

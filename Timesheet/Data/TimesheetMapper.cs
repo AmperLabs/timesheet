@@ -7,7 +7,7 @@ namespace Timesheet.Data
     public partial class TimesheetMapper
     {
         [MapperIgnoreSource(nameof(TimesheetDay.DateTime))]
-        [MapperIgnoreSource(nameof(TimesheetDay.WorkingTimeInPresence))]
+        [MapperIgnoreSource(nameof(TimesheetDay.NetWorkingTimeInPresence))]
         [MapperIgnoreSource(nameof(TimesheetDay.TotalWorkingTime))]
         [MapperIgnoreSource(nameof(TimesheetDay.OvertimeHours))]
         [MapperIgnoreSource(nameof(TimesheetDay.IsMaximumDialyWorkingTimeExceeded))]

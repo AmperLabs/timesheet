@@ -31,7 +31,7 @@ namespace Tests
             day.MobileWork.ShouldBeNull();
 
 
-            day.WorkingTimeInPresence.ShouldBe(regularWorkingTime);
+            day.NetWorkingTimeInPresence.ShouldBe(regularWorkingTime);
             day.TotalWorkingTime.ShouldBe(regularWorkingTime);
             day.OvertimeHours.ShouldBe(TimeSpan.Zero);
             day.IsMaximumDialyWorkingTimeExceeded.ShouldBe(false);
@@ -56,7 +56,7 @@ namespace Tests
             day.EndOfWork.ShouldNotBeNull();
             day.MobileWork.ShouldBeNull();
 
-            day.WorkingTimeInPresence.ShouldBe(regularWorkingTime + overtime);
+            day.NetWorkingTimeInPresence.ShouldBe(regularWorkingTime + overtime);
             day.TotalWorkingTime.ShouldBe(regularWorkingTime + overtime);
             day.OvertimeHours.ShouldBe(overtime);
             day.IsMaximumDialyWorkingTimeExceeded.ShouldBe(false);
@@ -81,7 +81,7 @@ namespace Tests
             day.EndOfWork.ShouldNotBeNull();
             day.MobileWork.ShouldBeNull();
 
-            day.WorkingTimeInPresence.ShouldBe(regularWorkingTime + overtime);
+            day.NetWorkingTimeInPresence.ShouldBe(regularWorkingTime + overtime);
             day.TotalWorkingTime.ShouldBe(regularWorkingTime + overtime);
             day.OvertimeHours.ShouldBe(overtime);
             day.IsMaximumDialyWorkingTimeExceeded.ShouldBe(true);
@@ -107,7 +107,7 @@ namespace Tests
             day.EndOfWork.ShouldNotBeNull();
             day.MobileWork.ShouldNotBeNull();
 
-            day.WorkingTimeInPresence.ShouldBe(presenceTime);
+            day.NetWorkingTimeInPresence.ShouldBe(presenceTime);
             day.TotalWorkingTime.ShouldBe(presenceTime + mobileWork);
             day.OvertimeHours.ShouldBe(TimeSpan.Zero);
             day.IsMaximumDialyWorkingTimeExceeded.ShouldBe(false);
@@ -136,7 +136,7 @@ namespace Tests
             day.EndOfWork.ShouldNotBeNull();
             day.MobileWork.ShouldNotBeNull();
 
-            day.WorkingTimeInPresence.ShouldBe(presenceTime);
+            day.NetWorkingTimeInPresence.ShouldBe(presenceTime);
             day.TotalWorkingTime.ShouldBe(presenceTime + mobileWork);
             day.OvertimeHours.ShouldBe(presenceTime + mobileWork - regularWorkingTime);
             day.IsMaximumDialyWorkingTimeExceeded.ShouldBe(false);
@@ -165,7 +165,7 @@ namespace Tests
             day.EndOfWork.ShouldNotBeNull();
             day.MobileWork.ShouldNotBeNull();
 
-            day.WorkingTimeInPresence.ShouldBe(presenceTime);
+            day.NetWorkingTimeInPresence.ShouldBe(presenceTime);
             day.TotalWorkingTime.ShouldBe(presenceTime + mobileWork);
             day.OvertimeHours.ShouldBe(presenceTime + mobileWork - regularWorkingTime);
             day.IsMaximumDialyWorkingTimeExceeded.ShouldBe(true);
@@ -187,7 +187,7 @@ namespace Tests
             day.EndOfWork.ShouldBeNull();
             day.MobileWork.ShouldBeNull();
 
-            day.WorkingTimeInPresence.ShouldBeNull();
+            day.NetWorkingTimeInPresence.ShouldBeNull();
             day.TotalWorkingTime.ShouldBe(regularWorkingTime);
             day.OvertimeHours.ShouldBe(TimeSpan.Zero);
             day.IsMaximumDialyWorkingTimeExceeded.ShouldBe(false);
@@ -213,7 +213,7 @@ namespace Tests
             //day.EndOfWork.ShouldBeNull();
             //day.MobileWork.ShouldBeNull();
 
-            day.WorkingTimeInPresence.ShouldBeNull();
+            day.NetWorkingTimeInPresence.ShouldBeNull();
             day.TotalWorkingTime.ShouldBe(regularWorkingTime);
             day.OvertimeHours.ShouldBe(TimeSpan.Zero);
             day.IsMaximumDialyWorkingTimeExceeded.ShouldBe(false);

@@ -66,11 +66,11 @@
 
     private async Task OnLogout()
     {
-        NavigationManager.NavigateTo("logout");
+        NavigationManager.NavigateTo("logout", true);
     }
 
     private async Task OnLogin()
     {
-        NavigationManager.NavigateTo("login");
+        NavigationManager.NavigateTo("login", true);
     }
 }

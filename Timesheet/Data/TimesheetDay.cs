@@ -77,7 +77,24 @@ namespace Timesheet.Data
             }
         }
 
-        public TimeSpan? WorkingTimeInPresence
+
+        public TimeSpan? GrossWorkingTimeInPresence
+        {
+            get
+            {
+                var earliestPossibleStart = new TimeOnly(6, 0, 0);
+
+                var start = StartOfWork;
+
+                if (start.HasValue && start < earliestPossibleStart)
+                    start = earliestPossibleStart;
+
+                var timeIncludingBreaks = EndOfWork - start;
+
+                return timeIncludingBreaks;
+            }
+        }
+        public TimeSpan? NetWorkingTimeInPresence
         {
             get
             {
@@ -110,16 +127,16 @@ namespace Timesheet.Data
                 switch (PresenceType)
                 {
                     case PresenceType.PresenceOnly:
-                        return WorkingTimeInPresence;
+                        return NetWorkingTimeInPresence;
                     case PresenceType.MobileOnly:
                         return DailyRegularWorkingTime;
                     case PresenceType.MobilePartly:
-                        if (WorkingTimeInPresence == null && MobileWork == null)
+                        if (NetWorkingTimeInPresence == null && MobileWork == null)
                             return null;
 
                         var total = TimeSpan.Zero;
-                        if (WorkingTimeInPresence != null)
-                            total += WorkingTimeInPresence.Value;
+                        if (NetWorkingTimeInPresence != null)
+                            total += NetWorkingTimeInPresence.Value;
 
                         if (MobileWork != null)
                             total += MobileWork.Value;
@@ -200,7 +217,6 @@ namespace Timesheet.Data
             }
         }
             
-            //=> TotalWorkingTime - DailyRegularWorkingTime;
         public bool? IsMaximumDialyWorkingTimeExceeded => TotalWorkingTime > MaximumDailyWorkingTime;      
 
         public bool IsMobileWorkAllowed
