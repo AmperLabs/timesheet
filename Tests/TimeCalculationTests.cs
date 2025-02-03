@@ -28,7 +28,7 @@ namespace Tests
             day.IsPresenceWorkAllowed.ShouldBe(true);
             day.StartOfWork.ShouldNotBeNull();
             day.EndOfWork.ShouldNotBeNull();
-            day.MobileWork.ShouldBeNull();
+            day.PartlyMobileWork.ShouldBeNull();
 
 
             day.NetWorkingTimeInPresence.ShouldBe(regularWorkingTime);
@@ -54,7 +54,7 @@ namespace Tests
             day.IsPresenceWorkAllowed.ShouldBe(true);
             day.StartOfWork.ShouldNotBeNull();
             day.EndOfWork.ShouldNotBeNull();
-            day.MobileWork.ShouldBeNull();
+            day.PartlyMobileWork.ShouldBeNull();
 
             day.NetWorkingTimeInPresence.ShouldBe(regularWorkingTime + overtime);
             day.TotalWorkingTime.ShouldBe(regularWorkingTime + overtime);
@@ -79,7 +79,7 @@ namespace Tests
             day.IsPresenceWorkAllowed.ShouldBe(true);
             day.StartOfWork.ShouldNotBeNull();
             day.EndOfWork.ShouldNotBeNull();
-            day.MobileWork.ShouldBeNull();
+            day.PartlyMobileWork.ShouldBeNull();
 
             day.NetWorkingTimeInPresence.ShouldBe(regularWorkingTime + overtime);
             day.TotalWorkingTime.ShouldBe(regularWorkingTime + overtime);
@@ -99,13 +99,13 @@ namespace Tests
             day.PresenceType = PresenceType.MobilePartly;
             day.StartOfWork = new TimeOnly(8, 0, 0);
             day.EndOfWork = TimeOnly.FromTimeSpan(day.StartOfWork.Value.ToTimeSpan() + presenceTime + expectedBreak);
-            day.MobileWork = mobileWork;
+            day.PartlyMobileWork = mobileWork;
 
             day.IsMobileWorkAllowed.ShouldBe(true);
             day.IsPresenceWorkAllowed.ShouldBe(true);
             day.StartOfWork.ShouldNotBeNull();
             day.EndOfWork.ShouldNotBeNull();
-            day.MobileWork.ShouldNotBeNull();
+            day.PartlyMobileWork.ShouldNotBeNull();
 
             day.NetWorkingTimeInPresence.ShouldBe(presenceTime);
             day.TotalWorkingTime.ShouldBe(presenceTime + mobileWork);
@@ -128,13 +128,13 @@ namespace Tests
             day.PresenceType = PresenceType.MobilePartly;
             day.StartOfWork = new TimeOnly(8, 0, 0);
             day.EndOfWork = TimeOnly.FromTimeSpan(day.StartOfWork.Value.ToTimeSpan() + presenceTime + expectedBreak);
-            day.MobileWork = mobileWork;
+            day.PartlyMobileWork = mobileWork;
 
             day.IsMobileWorkAllowed.ShouldBe(true);
             day.IsPresenceWorkAllowed.ShouldBe(true);
             day.StartOfWork.ShouldNotBeNull();
             day.EndOfWork.ShouldNotBeNull();
-            day.MobileWork.ShouldNotBeNull();
+            day.PartlyMobileWork.ShouldNotBeNull();
 
             day.NetWorkingTimeInPresence.ShouldBe(presenceTime);
             day.TotalWorkingTime.ShouldBe(presenceTime + mobileWork);
@@ -157,13 +157,13 @@ namespace Tests
             day.PresenceType = PresenceType.MobilePartly;
             day.StartOfWork = new TimeOnly(8, 0, 0);
             day.EndOfWork = TimeOnly.FromTimeSpan(day.StartOfWork.Value.ToTimeSpan() + presenceTime + expectedBreak);
-            day.MobileWork = mobileWork;
+            day.PartlyMobileWork = mobileWork;
 
             day.IsMobileWorkAllowed.ShouldBe(true);
             day.IsPresenceWorkAllowed.ShouldBe(true);
             day.StartOfWork.ShouldNotBeNull();
             day.EndOfWork.ShouldNotBeNull();
-            day.MobileWork.ShouldNotBeNull();
+            day.PartlyMobileWork.ShouldNotBeNull();
 
             day.NetWorkingTimeInPresence.ShouldBe(presenceTime);
             day.TotalWorkingTime.ShouldBe(presenceTime + mobileWork);
@@ -185,7 +185,7 @@ namespace Tests
             day.IsPresenceWorkAllowed.ShouldBe(false);
             day.StartOfWork.ShouldBeNull();
             day.EndOfWork.ShouldBeNull();
-            day.MobileWork.ShouldBeNull();
+            day.PartlyMobileWork.ShouldBeNull();
 
             day.NetWorkingTimeInPresence.ShouldBeNull();
             day.TotalWorkingTime.ShouldBe(regularWorkingTime);
@@ -205,7 +205,7 @@ namespace Tests
 
             day.StartOfWork = new TimeOnly(8, 0, 0);
             day.StartOfWork = new TimeOnly(9, 0, 0);
-            day.MobileWork = TimeSpan.FromHours(1);
+            day.PartlyMobileWork = TimeSpan.FromHours(1);
 
             day.IsMobileWorkAllowed.ShouldBe(true);
             day.IsPresenceWorkAllowed.ShouldBe(false);
@@ -395,7 +395,7 @@ namespace Tests
                 PresenceType = PresenceType.MobilePartly,
                 StartOfWork = new TimeOnly(8, 0, 0),
                 EndOfWork = new TimeOnly(15, 0, 0),
-                MobileWork = TimeSpan.FromHours(1)
+                PartlyMobileWork = TimeSpan.FromHours(1)
             });
 
             // Wed - Total 8 hrs

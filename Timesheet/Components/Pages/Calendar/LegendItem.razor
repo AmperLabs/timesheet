@@ -1,0 +1,14 @@
+﻿<FluentStack Orientation="Orientation.Horizontal" VerticalAlignment="VerticalAlignment.Center">
+    <div style="display:inline-block; width:10px; height:10px; background-color:@_color;"></div>
+    <small style="color: lightgray;">@Caption</small>
+</FluentStack>
+
+@code {
+    [Parameter]
+    public string? Caption { get; set; }
+
+    [Parameter]
+    public string? Color { get; set; }
+
+    private string _color => Color ?? "lightgray";
+}

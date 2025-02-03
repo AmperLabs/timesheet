@@ -12,7 +12,8 @@ namespace Timesheet.Entities
         public PresenceType PresenceType { get; set; }
         public TimeOnly? StartOfWork { get; set; }
         public TimeOnly? EndOfWork { get; set; }
-        public TimeSpan? MobileWork { get; set; }
+        public TimeSpan? PartlyMobileWork { get; set; }
+        public string? Comment { get; set; }
 
         public static string GenerateKey(DateTime date, string userId)
         {

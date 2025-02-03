@@ -43,8 +43,12 @@
             <td><FluentTimePicker Placeholder="Gehen" Value="@_day.EndOfWork.ToDateTimeNullable()" ValueChanged="@(e => _day.EndOfWork = e.ToTimeOnlyNullable())" Disabled="@(!_day.IsPresenceWorkAllowed)" Style="width: 100%;" /></td>
         </tr>
         <tr>
-            <td><FluentLabel>Mobil</FluentLabel></td>
-            <td><TimeSpanInput @bind-Duration=_day.MobileWork Disabled="@(!_day.IsMobileWorkAllowed)" Style="width: 100%;" /></td>
+            <td><FluentLabel>Ant. Mobil</FluentLabel></td>
+            <td><TimeSpanInput @bind-Duration=_day.PartlyMobileWork Disabled="@(!_day.IsMobileWorkAllowed)" Style="width: 100%;" /></td>
+        </tr>
+        <tr>
+            <td><FluentLabel>Kommentar</FluentLabel></td>
+            <td><FluentTextField @bind-Value=_day.Comment Style="width: 100%;" /></td>
         </tr>
         <tr>
             <td><FluentLabel>Brutto AZ</FluentLabel></td>

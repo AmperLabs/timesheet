@@ -29,6 +29,16 @@
                             }
                         </DaysTemplate>
                     </FluentCalendar>
+
+                    <FluentStack Orientation="Orientation.Vertical">                        
+                        <LegendItem Caption="Nur vor Ort" Color="@GetColorForPresenceType(PresenceType.PresenceOnly)" />
+                        <LegendItem Caption="Anteilig Mobil" Color="@GetColorForPresenceType(PresenceType.MobilePartly)" />
+                        <LegendItem Caption="Nur Mobil" Color="@GetColorForPresenceType(PresenceType.MobileOnly)" />
+                        <LegendItem Caption="Feiertag" Color="@GetColorForPresenceType(PresenceType.PublicHoliday)" />
+                        <LegendItem Caption="Urlaub" Color="@GetColorForPresenceType(PresenceType.Vacation)" />
+                        <LegendItem Caption="Krank" Color="@GetColorForPresenceType(PresenceType.Illness)" />
+                    </FluentStack>
+
                 </FluentCard>
             </FluentGridItem>
             

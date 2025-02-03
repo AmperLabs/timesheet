@@ -50,7 +50,7 @@ namespace Tests
                 PresenceType = PresenceType.MobilePartly,
                 StartOfWork = new TimeOnly(07, 0, 0),
                 EndOfWork = new TimeOnly(16, 0, 0),
-                MobileWork = new TimeSpan(1, 30, 0)
+                PartlyMobileWork = new TimeSpan(1, 30, 0)
             };
 
             var mapper = new TimesheetMapper();

@@ -30,11 +30,20 @@
             <td><FluentTextField ReadOnly="true" Appearance="FluentInputAppearance.Filled" Value="@($"{Math.Round(_week.MobileWorkShare * 100 ?? 0, 1)} %")"></FluentTextField></td>
         </tr>
 
+        <tr>
+            <td><FluentLabel Typo="Typography.Body" Weight="FontWeight.Bold">Ganztägige Mobilarbeit</FluentLabel></td>
+            <td colspan="2"><DurationDisplay Duration="@_week.TotalFullyMobileWork" ReadOnly="true" Style="width: 100%;" /></td>
+        </tr>
+
+        <tr>
+            <td><FluentLabel Typo="Typography.Body" Weight="FontWeight.Bold">Anteilige Mobilarbeit</FluentLabel></td>
+            <td colspan="2"><DurationDisplay Duration="@_week.TotalPartlyMobileWork" ReadOnly="true" Style="width: 100%;" /></td>
+        </tr>
 
 
         <tr>
             <td><FluentLabel Typo="Typography.Body" Weight="FontWeight.Bold">Gebuchte Mobilarbeit</FluentLabel></td>
-            <td colspan="2"><DurationDisplay Duration="@_week.BookedMobileWork" ReadOnly="true" Style="width: 100%;" /></td>
+            <td colspan="2"><TimeSpanInput @bind-Duration=_week.BookedMobileWork Style="width: 100%;" /></td>
         </tr>
 
         <tr>
@@ -47,7 +56,18 @@
             <td><FluentLabel Typo="Typography.Body" Weight="FontWeight.Bold">Überstunden</FluentLabel></td>
             <td colspan="2"><DurationDisplay Duration="@_week.OvertimeHours" ReadOnly="true" Style="width: 100%;" /></td>
         </tr>
+
+        <tr>
+            <td></td>
+            <td colspan="2"><FluentButton OnClick="@Save" Disabled="@(!_week.IsDirty)" Style="width: 100%;">Save</FluentButton></td>
+        </tr>
     </table>
+}
+else
+{
+    <div style="width: 300px;display: grid; grid-gap: 12px; grid-auto-flow: column;">
+        <FluentProgressRing></FluentProgressRing>
+    </div>
 }
 
 @code {
@@ -56,6 +76,9 @@
 
     [Parameter]
     public DateTime? Date { get; set; }
+
+    [Parameter]
+    public EventCallback ValueChanged { get; set; }
 
     private string _currentUserId { get; set; }
 
@@ -92,6 +115,20 @@
         else
         {
             _week = TimesheetWeek.FromCalendarWeek(_year, _weekNumber);
+        }
+    }
+
+    private async Task Save()
+    {
+        if (_week != null)
+        {
+            await CalendarService.CreateOrUpdateTimesheetWeek(_week, _currentUserId);
+            _week.ResetDirtyFlag();
+
+            if (ValueChanged.HasDelegate)
+            {
+                await ValueChanged.InvokeAsync();
+            }
         }
     }
 }

@@ -46,10 +46,13 @@ namespace Timesheet.Data
         }
 
         public TimeSpan TotalWorkingTimeInPresence => BookedDays == null ? TimeSpan.Zero : TimeSpan.FromSeconds(BookedDays.Where(x => x.NetWorkingTimeInPresence.HasValue).Select(x => x.NetWorkingTimeInPresence!.Value.TotalSeconds).Sum());
-        public TimeSpan TotalMobileWork => BookedDays == null ? TimeSpan.Zero : TimeSpan.FromSeconds(BookedDays.Where(x => x.MobileWork.HasValue).Select(x => x.MobileWork!.Value.TotalSeconds).Sum() + BookedDays.Where(x => x.PresenceType == PresenceType.MobileOnly).Select(x => x.TotalWorkingTime!.Value.TotalSeconds).Sum() );
+        public TimeSpan TotalMobileWork => BookedDays == null ? TimeSpan.Zero : TotalPartlyMobileWork + TotalFullyMobileWork;
+        public TimeSpan TotalPartlyMobileWork => BookedDays == null ? TimeSpan.Zero : TimeSpan.FromSeconds(BookedDays.Where(x => x.PartlyMobileWork.HasValue).Select(x => x.PartlyMobileWork!.Value.TotalSeconds).Sum());
+        public TimeSpan TotalFullyMobileWork => BookedDays == null ? TimeSpan.Zero : TimeSpan.FromSeconds(BookedDays.Where(x => x.PresenceType == PresenceType.MobileOnly).Select(x => x.TotalWorkingTime!.Value.TotalSeconds).Sum());
+
         public TimeSpan TotalWorkingTime => BookedDays == null ? TimeSpan.Zero : TimeSpan.FromSeconds(BookedDays.Where(x => x.TotalWorkingTime.HasValue).Select(x => x.TotalWorkingTime!.Value.TotalSeconds).Sum());
         public TimeSpan OvertimeHours => BookedDays == null ? TimeSpan.Zero : TimeSpan.FromSeconds(BookedDays.Where(x => x.OvertimeHours.HasValue).Select(x => x.OvertimeHours!.Value.TotalSeconds).Sum());
-        public TimeSpan UnbookedMobileWork => BookedMobileWork.HasValue ? TotalMobileWork - BookedMobileWork.Value : TotalMobileWork;
+        public TimeSpan UnbookedMobileWork => BookedMobileWork.HasValue ? TotalPartlyMobileWork - BookedMobileWork.Value : TotalPartlyMobileWork;
 
         public double? MobileWorkShare => TotalWorkingTime.TotalSeconds > 0 ? TotalMobileWork.TotalSeconds / TotalWorkingTime.TotalSeconds : null;
         public double? PresenceWorkShare => TotalWorkingTime.TotalSeconds > 0 ? TotalWorkingTimeInPresence.TotalSeconds / TotalWorkingTime.TotalSeconds : null;

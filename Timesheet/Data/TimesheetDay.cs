@@ -63,20 +63,23 @@ namespace Timesheet.Data
             }        
         }
 
-        private TimeSpan?_mobileWork = null;
-        public TimeSpan? MobileWork
+        private TimeSpan? _partlyMobileWork = null;
+        public TimeSpan? PartlyMobileWork
         {
-            get => _mobileWork;
+            get => _partlyMobileWork;
             set
             {
-                if (_mobileWork != value)
+                if (_partlyMobileWork != value)
                 {
-                    _mobileWork = value;
+                    _partlyMobileWork = value;
                     IsDirty = true;
                 }
             }
         }
 
+        public string? Comment { get; set; } = null;
+
+        public TimeSpan FullyMobileWork => PresenceType == PresenceType.MobileOnly ? DailyRegularWorkingTime : TimeSpan.Zero;
 
         public TimeSpan? GrossWorkingTimeInPresence
         {
@@ -131,15 +134,15 @@ namespace Timesheet.Data
                     case PresenceType.MobileOnly:
                         return DailyRegularWorkingTime;
                     case PresenceType.MobilePartly:
-                        if (NetWorkingTimeInPresence == null && MobileWork == null)
+                        if (NetWorkingTimeInPresence == null && PartlyMobileWork == null)
                             return null;
 
                         var total = TimeSpan.Zero;
                         if (NetWorkingTimeInPresence != null)
                             total += NetWorkingTimeInPresence.Value;
 
-                        if (MobileWork != null)
-                            total += MobileWork.Value;
+                        if (PartlyMobileWork != null)
+                            total += PartlyMobileWork.Value;
                         
                         return total;
                     case PresenceType.Vacation:
