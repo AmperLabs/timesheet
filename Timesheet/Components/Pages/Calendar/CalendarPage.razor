@@ -63,6 +63,16 @@
                     }
                 </FluentCard>
             </FluentGridItem>
+        
+            <FluentGridItem sm="12" md="6" lg="4" xl="3">
+                <FluentCard>
+                    <CardHeader Title="Jahresdetails" />
+                    @if (SelectedDay != null)
+                    {
+                        <YearView Date="@SelectedDay" />
+                    }
+                </FluentCard>
+            </FluentGridItem>
         </FluentGrid>
     </Authorized>
     <NotAuthorized>

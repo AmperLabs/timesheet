@@ -1,0 +1,131 @@
+﻿@using Timesheet.Common
+@using Timesheet.Data
+@using Timesheet.Services
+
+@rendermode InteractiveServer
+
+@if(_year != null)
+{
+    <table>
+        <tr>
+            <td><FluentLabel Typo="Typography.Body" Weight="FontWeight.Bold">Kalenderjahr</FluentLabel></td>
+            <td colspan="2"><FluentLabel Typo="Typography.Body" Weight="FontWeight.Normal">@($"{_calendarYear}")</FluentLabel></td>
+        </tr>
+
+        <tr>
+            <td><FluentLabel Typo="Typography.Body" Weight="FontWeight.Bold">Gesamte Arbeitszeit</FluentLabel></td>
+            <td colspan="2"><DurationDisplay Duration="@_year.TotalWorkingTime" ReadOnly="true" Style="width: 100%;" /></td>
+        </tr>
+
+        <tr>
+            <td><FluentLabel Typo="Typography.Body" Weight="FontWeight.Bold">Vor Ort</FluentLabel></td>
+            <td><DurationDisplay Duration="@_year.TotalWorkingTimeInPresence" ReadOnly="true" Style="width: 100%;" /></td>
+            <td><FluentTextField ReadOnly="true" Appearance="FluentInputAppearance.Filled" Value="@($"{Math.Round(_year.PresenceWorkShare * 100 ?? 0, 1)} %")"></FluentTextField></td>
+        </tr>
+
+        <tr>
+            <td><FluentLabel Typo="Typography.Body" Weight="FontWeight.Bold">Mobilarbeit</FluentLabel></td>
+            <td><DurationDisplay Duration="@_year.TotalMobileWork" ReadOnly="true" Style="width: 100%;" /></td>
+            <td><FluentTextField ReadOnly="true" Appearance="FluentInputAppearance.Filled" Value="@($"{Math.Round(_year.MobileWorkShare * 100 ?? 0, 1)} %")"></FluentTextField></td>
+        </tr>
+
+        <tr>
+            <td><FluentLabel Typo="Typography.Body" Weight="FontWeight.Bold">Ganztägige Mobilarbeit</FluentLabel></td>
+            <td colspan="2"><DurationDisplay Duration="@_year.TotalFullyMobileWork" ReadOnly="true" Style="width: 100%;" /></td>
+        </tr>
+
+        <tr>
+            <td><FluentLabel Typo="Typography.Body" Weight="FontWeight.Bold">Anteilige Mobilarbeit</FluentLabel></td>
+            <td colspan="2"><DurationDisplay Duration="@_year.TotalPartlyMobileWork" ReadOnly="true" Style="width: 100%;" /></td>
+        </tr>
+
+
+        @* <tr>
+            <td><FluentLabel Typo="Typography.Body" Weight="FontWeight.Bold">Gebuchte Mobilarbeit</FluentLabel></td>
+            <td colspan="2"><TimeSpanInput @bind-Duration=_year.BookedMobileWork Style="width: 100%;" /></td>
+        </tr> *@
+
+        <tr>
+            <td><FluentLabel Typo="Typography.Body" Weight="FontWeight.Bold">Ungebuchte Mobilarbeit</FluentLabel></td>
+            <td colspan="2"><DurationDisplay Duration="@_year.UnbookedMobileWork" ReadOnly="true" Style="width: 100%;" /></td>
+        </tr>
+
+
+        <tr>
+            <td><FluentLabel Typo="Typography.Body" Weight="FontWeight.Bold">Überstunden</FluentLabel></td>
+            <td colspan="2"><DurationDisplay Duration="@_year.OvertimeHours" ReadOnly="true" Style="width: 100%;" /></td>
+        </tr>
+
+        <tr>
+            <td></td>
+            <td colspan="2"><FluentButton OnClick="@Save" Disabled="@(!_year.IsDirty)" Style="width: 100%;">Save</FluentButton></td>
+        </tr>
+    </table>
+}
+else
+{
+    <div style="width: 300px;display: grid; grid-gap: 12px; grid-auto-flow: column;">
+        <FluentProgressRing></FluentProgressRing>
+    </div>
+}
+
+@code {
+    [CascadingParameter]
+    private Task<AuthenticationState>? authenticationState { get; set; }
+
+    [Inject]
+    public CalendarService CalendarService { get; set; }
+
+    [Parameter]
+    public DateTime? Date { get; set; }
+
+    private string _currentUserId;
+
+    private int _calendarYear;
+    private TimesheetYear? _year;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (Date.HasValue)
+        {
+            _calendarYear = Date.Value.Year;
+        }
+
+        if (authenticationState is not null)
+        {
+            var state = await authenticationState;
+            _currentUserId = state.GetEmailForAuthenticatedUser();
+        }
+
+        await LoadYear();
+    }
+
+    private async Task LoadYear()
+    {
+        var year = await CalendarService.GetTimesheetYear(_calendarYear, _currentUserId);
+
+        if (year != null)
+        {
+            year.ResetDirtyFlag();
+            _year = year;
+        }
+        else
+        {
+            _year = TimesheetYear.FromYear(_calendarYear);
+        }
+    }
+
+    private async Task Save()
+    {
+        // if (_week != null)
+        // {
+        //     await CalendarService.CreateOrUpdateTimesheetWeek(_week, _currentUserId);
+        //     _week.ResetDirtyFlag();
+
+        //     if (ValueChanged.HasDelegate)
+        //     {
+        //         await ValueChanged.InvokeAsync();
+        //     }
+        // }
+    }
+}

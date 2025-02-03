@@ -15,6 +15,7 @@ namespace Timesheet.Services
         private string _databaseName = "";
         private string _timesheetDaysCollectionName = "days";
         private string _timesheetWeeksCollectionName = "weeks";
+        private string _timesheetYearsCollectionName = "years";
 
         private MongoClient _client;
         private IMongoDatabase _database;
@@ -195,7 +196,7 @@ namespace Timesheet.Services
             }
         }
 
-        public async Task DeleteTimesheetDay(int year, int weekNumber, string userId)
+        public async Task DeleteTimesheetWeek(int year, int weekNumber, string userId)
         {
             var id = WeekRecord.GenerateKey(year, weekNumber, userId);
 
@@ -206,6 +207,56 @@ namespace Timesheet.Services
         #endregion
 
         #region Yearly bookings
+        public async Task<TimesheetYear?> GetTimesheetYear(int year, string userId)
+        {
+            var id = YearRecord.GenerateKey(year, userId);
+
+            var collection = _database.GetCollection<YearRecord>(_timesheetYearsCollectionName);
+
+            var record = await collection.AsQueryable()
+            .Where(x => x.Id == id)
+            .FirstOrDefaultAsync();
+
+            var tsYear = record == null ? TimesheetYear.FromYear(year) : _mapper.YearRecordToTimesheetYear(record);
+
+            var from = new DateTime(year, 1, 1);
+            var to = new DateTime(year, 12, 31);
+
+            var days = await GetTimesheetDaysByDateRange(from, to, userId);
+
+            tsYear.BookedDays = days ?? new List<TimesheetDay>();
+
+            return tsYear;
+        }
+
+        public async Task CreateOrUpdateTimesheetYear(TimesheetYear timesheetYear, string userId)
+        {
+            var id = YearRecord.GenerateKey(timesheetYear.Year, userId);
+
+            var record = _mapper.TimesheetYearToYearRecord(timesheetYear);
+            record.Id = id;
+            record.UserId = userId;
+
+            var collection = _database.GetCollection<YearRecord>(_timesheetYearsCollectionName);
+
+            if (collection.AsQueryable().Where(x => x.Id == id).Count() > 0)
+            {
+                var result = await collection.ReplaceOneAsync(x => x.Id == id, record);
+            }
+            else
+            {
+                await collection.InsertOneAsync(record);
+            }
+        }
+
+        public async Task DeleteTimesheetYear(int year, string userId)
+        {
+            var id = YearRecord.GenerateKey(year, userId);
+
+            var collection = _database.GetCollection<YearRecord>(_timesheetYearsCollectionName);
+
+            await collection.DeleteOneAsync(x => x.Id == id);
+        }
         #endregion
     }
 }

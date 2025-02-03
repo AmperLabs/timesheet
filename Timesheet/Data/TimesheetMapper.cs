@@ -28,5 +28,18 @@ namespace Timesheet.Data
 
         [MapperIgnoreSource(nameof(WeekRecord.Id))]
         public partial TimesheetWeek WeekRecordToTimesheetWeek(WeekRecord weekRecord);
+
+
+        [MapperIgnoreSource(nameof(TimesheetYear.TotalWorkingTimeInPresence))]
+        [MapperIgnoreSource(nameof(TimesheetYear.TotalMobileWork))]
+        [MapperIgnoreSource(nameof(TimesheetYear.TotalWorkingTime))]
+        [MapperIgnoreSource(nameof(TimesheetYear.OvertimeHours))]
+        [MapperIgnoreSource(nameof(TimesheetYear.UnbookedMobileWork))]
+        [MapperIgnoreSource(nameof(TimesheetYear.MobileWorkShare))]
+        [MapperIgnoreSource(nameof(TimesheetYear.PresenceWorkShare))]
+        public partial YearRecord TimesheetYearToYearRecord(TimesheetYear timesheetYear);
+
+        [MapperIgnoreSource(nameof(YearRecord.Id))]
+        public partial TimesheetYear YearRecordToTimesheetYear(YearRecord yearRecord);
     }
 }
