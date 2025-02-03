@@ -11,11 +11,11 @@
 <AuthorizeView>
     <Authorized>
         <FluentGrid>
-            <FluentGridItem xs="3">
+            <FluentGridItem sm="12" md="6" lg="4" xl="3">
                 <FluentCard>
                     <CardHeader Title="Kalender" />
 
-                    <FluentCalendar ValueChanged="@SelectedDateChanged" Value="@SelectedDay" DisabledDateFunc="@DisabledDay" Culture="@_culture">
+                    <FluentCalendar ValueChanged="@SelectedDateChanged" PickerMonthChanged="@PickerMonthChanged" Value="@SelectedDay" DisabledDateFunc="@DisabledDay" Culture="@_culture">
                         <DaysTemplate Context="dayContext">
                             @if (!dayContext.IsInactive && HasBooking(dayContext.Date))
                             {
@@ -42,8 +42,8 @@
                 </FluentCard>
             </FluentGridItem>
             
-            <FluentGridItem xs="3">
-                <FluentCard AreaRestricted="false">
+            <FluentGridItem sm="12" md="6" lg="4" xl="3">
+                <FluentCard AreaRestricted="true">
                     <CardHeader Title="Tagesdetails" />
                     
                     @if (SelectedDay != null)
@@ -54,7 +54,7 @@
                 </FluentCard>
             </FluentGridItem>
         
-            <FluentGridItem xs="3">
+            <FluentGridItem sm="12" md="6" lg="4" xl="3">
                 <FluentCard>
                     <CardHeader Title="Wochendetails" />
                     @if (SelectedDay != null)
@@ -119,6 +119,13 @@
     }
 
     private async Task SelectedDateChanged(DateTime? date)
+    {
+        SelectedDay = date;
+
+        await LoadBookingsCurrentInMonth();
+    }
+
+    private async Task PickerMonthChanged(DateTime date)
     {
         SelectedDay = date;
 

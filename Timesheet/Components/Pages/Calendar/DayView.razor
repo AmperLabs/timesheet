@@ -120,7 +120,8 @@ else
 
     private bool IsToday => Date.IsSameDay(DateTime.Today);
 
-    private string TableStyle => IsToday ? "border: 1px solid var(--accent-fill-rest);" : "border: none";
+    //private string TableStyle => IsToday ? "border: 1px solid var(--accent-fill-rest);" : "border: none";
+    private string TableStyle => "border: none";
 
     private List<PresenceType> PresenceTypes = Enum.GetValues<PresenceType>().ToList();
 
