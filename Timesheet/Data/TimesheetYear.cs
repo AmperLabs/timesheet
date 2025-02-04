@@ -10,7 +10,33 @@ namespace Timesheet.Data
         public string UserId { get; set; }
         public int Year { get; set; }
 
-        public TimeSpan? InitialOvertimeHours { get; set; } = TimeSpan.Zero;
+        private TimeSpan? _initialOvertimeHours = TimeSpan.Zero;
+        public TimeSpan? InitialOvertimeHours
+        {
+            get => _initialOvertimeHours;
+            set
+            {
+                if(value != _initialOvertimeHours)
+                {
+                    _initialOvertimeHours = value;
+                    IsDirty = true;
+                }
+            }
+        }
+
+        private int? _vacationEntitlement = 0;
+        public int? VacationEntitlement
+        {
+            get => _vacationEntitlement;
+            set
+            {
+                if (value != _vacationEntitlement)
+                {
+                    _vacationEntitlement = value;
+                    IsDirty = true;
+                }
+            }
+        }
 
         public bool IsDirty { get; private set; }
         public void ResetDirtyFlag()
@@ -25,8 +51,13 @@ namespace Timesheet.Data
         public TimeSpan TotalPartlyMobileWork => BookedDays == null ? TimeSpan.Zero : TimeSpan.FromSeconds(BookedDays.Where(x => x.PartlyMobileWork.HasValue).Select(x => x.PartlyMobileWork!.Value.TotalSeconds).Sum());
         public TimeSpan TotalFullyMobileWork => BookedDays == null ? TimeSpan.Zero : TimeSpan.FromSeconds(BookedDays.Where(x => x.PresenceType == PresenceType.MobileOnly).Select(x => x.TotalWorkingTime!.Value.TotalSeconds).Sum());
 
+        public int TotalFullyMobileWorkDays => BookedDays == null ? 0 : BookedDays.Where(x => x.PresenceType == PresenceType.MobileOnly).Count();
+
         public TimeSpan TotalWorkingTime => BookedDays == null ? TimeSpan.Zero : TimeSpan.FromSeconds(BookedDays.Where(x => x.TotalWorkingTime.HasValue).Select(x => x.TotalWorkingTime!.Value.TotalSeconds).Sum());
         public TimeSpan OvertimeHours => BookedDays == null ? TimeSpan.Zero : TimeSpan.FromSeconds(BookedDays.Where(x => x.OvertimeHours.HasValue).Select(x => x.OvertimeHours!.Value.TotalSeconds).Sum());
+
+        public TimeSpan TotalOvertimeHours => OvertimeHours + (InitialOvertimeHours ?? TimeSpan.Zero);
+        
         //public TimeSpan UnbookedMobileWork => BookedMobileWork.HasValue ? TotalPartlyMobileWork - BookedMobileWork.Value : TotalPartlyMobileWork;
 
         // TODO: sinnvoll implementieren

@@ -32,7 +32,8 @@
 
         <tr>
             <td><FluentLabel Typo="Typography.Body" Weight="FontWeight.Bold">Ganztägige Mobilarbeit</FluentLabel></td>
-            <td colspan="2"><DurationDisplay Duration="@_week.TotalFullyMobileWork" ReadOnly="true" Style="width: 100%;" /></td>
+            <td ><DurationDisplay Duration="@_week.TotalFullyMobileWork" ReadOnly="true" Style="width: 100%;" /></td>
+            <td><FluentTextField ReadOnly="true" Appearance="FluentInputAppearance.Filled" Value="@($"{_week.TotalFullyMobileWorkDays} d")"></FluentTextField></td>
         </tr>
 
         <tr>

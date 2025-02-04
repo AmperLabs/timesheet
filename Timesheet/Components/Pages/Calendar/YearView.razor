@@ -6,61 +6,130 @@
 
 @if(_year != null)
 {
-    <table>
-        <tr>
-            <td><FluentLabel Typo="Typography.Body" Weight="FontWeight.Bold">Kalenderjahr</FluentLabel></td>
-            <td colspan="2"><FluentLabel Typo="Typography.Body" Weight="FontWeight.Normal">@($"{_calendarYear}")</FluentLabel></td>
-        </tr>
+    <FluentTabs Orientation="Orientation.Horizontal" ActiveTabId="tab_overview">
+        <FluentTab Label="Buchungen" Id="tab_overview">
+            <table>
+                <tr>
+                    <td><FluentLabel Typo="Typography.Body" Weight="FontWeight.Bold">Kalenderjahr</FluentLabel></td>
+                    <td colspan="2"><FluentLabel Typo="Typography.Body" Weight="FontWeight.Normal">@($"{_calendarYear}")</FluentLabel></td>
+                </tr>
 
-        <tr>
-            <td><FluentLabel Typo="Typography.Body" Weight="FontWeight.Bold">Gesamte Arbeitszeit</FluentLabel></td>
-            <td colspan="2"><DurationDisplay Duration="@_year.TotalWorkingTime" ReadOnly="true" Style="width: 100%;" /></td>
-        </tr>
+                <tr>
+                    <td><FluentLabel Typo="Typography.Body" Weight="FontWeight.Bold">Gesamte Arbeitszeit</FluentLabel></td>
+                    <td colspan="2"><DurationDisplay Duration="@_year.TotalWorkingTime" ReadOnly="true" Style="width: 100%;" /></td>
+                </tr>
 
-        <tr>
-            <td><FluentLabel Typo="Typography.Body" Weight="FontWeight.Bold">Vor Ort</FluentLabel></td>
-            <td><DurationDisplay Duration="@_year.TotalWorkingTimeInPresence" ReadOnly="true" Style="width: 100%;" /></td>
-            <td><FluentTextField ReadOnly="true" Appearance="FluentInputAppearance.Filled" Value="@($"{Math.Round(_year.PresenceWorkShare * 100 ?? 0, 1)} %")"></FluentTextField></td>
-        </tr>
+                <tr>
+                    <td><FluentLabel Typo="Typography.Body" Weight="FontWeight.Bold">Vor Ort</FluentLabel></td>
+                    <td><DurationDisplay Duration="@_year.TotalWorkingTimeInPresence" ReadOnly="true" Style="width: 100%;" /></td>
+                    <td><FluentTextField ReadOnly="true" Appearance="FluentInputAppearance.Filled" Value="@($"{Math.Round(_year.PresenceWorkShare * 100 ?? 0, 1)} %")"></FluentTextField></td>
+                </tr>
 
-        <tr>
-            <td><FluentLabel Typo="Typography.Body" Weight="FontWeight.Bold">Mobilarbeit</FluentLabel></td>
-            <td><DurationDisplay Duration="@_year.TotalMobileWork" ReadOnly="true" Style="width: 100%;" /></td>
-            <td><FluentTextField ReadOnly="true" Appearance="FluentInputAppearance.Filled" Value="@($"{Math.Round(_year.MobileWorkShare * 100 ?? 0, 1)} %")"></FluentTextField></td>
-        </tr>
+                <tr>
+                    <td><FluentLabel Typo="Typography.Body" Weight="FontWeight.Bold">Mobilarbeit</FluentLabel></td>
+                    <td><DurationDisplay Duration="@_year.TotalMobileWork" ReadOnly="true" Style="width: 100%;" /></td>
+                    <td><FluentTextField ReadOnly="true" Appearance="FluentInputAppearance.Filled" Value="@($"{Math.Round(_year.MobileWorkShare * 100 ?? 0, 1)} %")"></FluentTextField></td>
+                </tr>
 
-        <tr>
-            <td><FluentLabel Typo="Typography.Body" Weight="FontWeight.Bold">Ganztägige Mobilarbeit</FluentLabel></td>
-            <td colspan="2"><DurationDisplay Duration="@_year.TotalFullyMobileWork" ReadOnly="true" Style="width: 100%;" /></td>
-        </tr>
+                <tr>
+                    <td><FluentLabel Typo="Typography.Body" Weight="FontWeight.Bold">Ganztägige Mobilarbeit</FluentLabel></td>
+                    <td><DurationDisplay Duration="@_year.TotalFullyMobileWork" ReadOnly="true" Style="width: 100%;" /></td>
+                    <td><FluentTextField ReadOnly="true" Appearance="FluentInputAppearance.Filled" Value="@($"{_year.TotalFullyMobileWorkDays} d")"></FluentTextField></td>
+                </tr>
 
-        <tr>
-            <td><FluentLabel Typo="Typography.Body" Weight="FontWeight.Bold">Anteilige Mobilarbeit</FluentLabel></td>
-            <td colspan="2"><DurationDisplay Duration="@_year.TotalPartlyMobileWork" ReadOnly="true" Style="width: 100%;" /></td>
-        </tr>
+                <tr>
+                    <td><FluentLabel Typo="Typography.Body" Weight="FontWeight.Bold">Anteilige Mobilarbeit</FluentLabel></td>
+                    <td colspan="2"><DurationDisplay Duration="@_year.TotalPartlyMobileWork" ReadOnly="true" Style="width: 100%;" /></td>
+                </tr>
 
-
-        @* <tr>
+                @* <tr>
             <td><FluentLabel Typo="Typography.Body" Weight="FontWeight.Bold">Gebuchte Mobilarbeit</FluentLabel></td>
             <td colspan="2"><TimeSpanInput @bind-Duration=_year.BookedMobileWork Style="width: 100%;" /></td>
-        </tr> *@
+            </tr> *@
 
-        <tr>
-            <td><FluentLabel Typo="Typography.Body" Weight="FontWeight.Bold">Ungebuchte Mobilarbeit</FluentLabel></td>
-            <td colspan="2"><DurationDisplay Duration="@_year.UnbookedMobileWork" ReadOnly="true" Style="width: 100%;" /></td>
-        </tr>
+                <tr>
+                    <td><FluentLabel Typo="Typography.Body" Weight="FontWeight.Bold">Ungebuchte Mobilarbeit</FluentLabel></td>
+                    <td colspan="2"><DurationDisplay Duration="@_year.UnbookedMobileWork" ReadOnly="true" Style="width: 100%;" /></td>
+                </tr>                
+            </table>
+        </FluentTab>
+        <FluentTab Label="Überstunden" Id="tab_overtime">
+            <table>
+                <tr>
+                    <td><FluentLabel Typo="Typography.Body" Weight="FontWeight.Bold">Überstunden</FluentLabel></td>
+                    <td colspan="2"><DurationDisplay Duration="@_year.OvertimeHours" ReadOnly="true" Style="width: 100%;" /></td>
+                </tr>
 
+                <tr>
+                    <td><FluentLabel Typo="Typography.Body" Weight="FontWeight.Bold">Überstunden aus Vorjahr</FluentLabel></td>
+                    <td><TimeSpanInput @bind-Duration=_year.InitialOvertimeHours Style="width: 100%;" /></td>
+                </tr>
 
-        <tr>
-            <td><FluentLabel Typo="Typography.Body" Weight="FontWeight.Bold">Überstunden</FluentLabel></td>
-            <td colspan="2"><DurationDisplay Duration="@_year.OvertimeHours" ReadOnly="true" Style="width: 100%;" /></td>
-        </tr>
+                <tr>
+                    <td><FluentLabel Typo="Typography.Body" Weight="FontWeight.Bold">Gesamte Überstunden</FluentLabel></td>
+                    <td colspan="2"><DurationDisplay Duration="@_year.TotalOvertimeHours" ReadOnly="true" Style="width: 100%;" /></td>
+                </tr>
 
-        <tr>
-            <td></td>
-            <td colspan="2"><FluentButton OnClick="@Save" Disabled="@(!_year.IsDirty)" Style="width: 100%;">Save</FluentButton></td>
-        </tr>
-    </table>
+                <tr>
+                    <td></td>
+                    <td colspan="2"><FluentButton OnClick="@Save" Disabled="@(!_year.IsDirty)" Style="width: 100%;">Save</FluentButton></td>
+                </tr>
+            </table>
+        </FluentTab>
+        <FluentTab Label="Statistik" Id="tab_statistics">
+            <table>
+                <tr>
+                    <td><FluentLabel Typo="Typography.Body" Weight="FontWeight.Bold">Arbeitstage</FluentLabel></td>
+                    <td><FluentTextField ReadOnly="true" Appearance="FluentInputAppearance.Filled" Value=""></FluentTextField></td>
+                </tr>
+                <tr>
+                    <td><FluentLabel Typo="Typography.Body" Weight="FontWeight.Bold">AT mit Anwesenheit</FluentLabel></td>
+                    <td><FluentTextField ReadOnly="true" Appearance="FluentInputAppearance.Filled" Value=""></FluentTextField></td>
+                </tr>
+                <tr>
+                    <td><FluentLabel Typo="Typography.Body" Weight="FontWeight.Bold">AT mit Mobilarbeit</FluentLabel></td>
+                    <td><FluentTextField ReadOnly="true" Appearance="FluentInputAppearance.Filled" Value=""></FluentTextField></td>
+                </tr>
+                <tr>
+                    <td><FluentLabel Typo="Typography.Body" Weight="FontWeight.Bold">AT nur Mobilarbeit</FluentLabel></td>
+                    <td><FluentTextField ReadOnly="true" Appearance="FluentInputAppearance.Filled" Value=""></FluentTextField></td>
+                </tr>
+                <tr>
+                    <td><FluentLabel Typo="Typography.Body" Weight="FontWeight.Bold">Kranktage</FluentLabel></td>
+                    <td><FluentTextField ReadOnly="true" Appearance="FluentInputAppearance.Filled" Value=""></FluentTextField></td>
+                </tr>
+                <tr>
+                    <td><FluentLabel Typo="Typography.Body" Weight="FontWeight.Bold">Feiertage</FluentLabel></td>
+                    <td><FluentTextField ReadOnly="true" Appearance="FluentInputAppearance.Filled" Value=""></FluentTextField></td>
+                </tr>
+            </table>
+        </FluentTab>
+        <FluentTab Label="Urlaub" Id="tab_vacation">
+            <table>
+                <tr>
+                    <td><FluentLabel Typo="Typography.Body" Weight="FontWeight.Bold">Urlaubsanspruch</FluentLabel></td>
+                    <td><FluentNumberField TValue="int?" Min="0" Max="365" @bind-Value=_year.VacationEntitlement /></td>
+                </tr>
+                <tr>
+                    <td><FluentLabel Typo="Typography.Body" Weight="FontWeight.Bold">Urlaub gebucht</FluentLabel></td>
+                    <td><FluentTextField ReadOnly="true" Appearance="FluentInputAppearance.Filled" Value=""></FluentTextField></td>
+                </tr>
+                <tr>
+                    <td><FluentLabel Typo="Typography.Body" Weight="FontWeight.Bold">Urlaub genommen</FluentLabel></td>
+                    <td><FluentTextField ReadOnly="true" Appearance="FluentInputAppearance.Filled" Value=""></FluentTextField></td>
+                </tr>
+                <tr>
+                    <td><FluentLabel Typo="Typography.Body" Weight="FontWeight.Bold">Urlaub offen</FluentLabel></td>
+                    <td><FluentTextField ReadOnly="true" Appearance="FluentInputAppearance.Filled" Value=""></FluentTextField></td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td colspan="2"><FluentButton OnClick="@Save" Disabled="@(!_year.IsDirty)" Style="width: 100%;">Save</FluentButton></td>
+                </tr>
+            </table>
+        </FluentTab>
+    </FluentTabs>
+    
 }
 else
 {
@@ -79,8 +148,10 @@ else
     [Parameter]
     public DateTime? Date { get; set; }
 
-    private string _currentUserId;
+    [Parameter]
+    public EventCallback ValueChanged { get; set; }
 
+    private string _currentUserId;
     private int _calendarYear;
     private TimesheetYear? _year;
 
@@ -117,15 +188,15 @@ else
 
     private async Task Save()
     {
-        // if (_week != null)
-        // {
-        //     await CalendarService.CreateOrUpdateTimesheetWeek(_week, _currentUserId);
-        //     _week.ResetDirtyFlag();
+        if (_year != null)
+        {
+            await CalendarService.CreateOrUpdateTimesheetYear(_year, _currentUserId);
+            _year.ResetDirtyFlag();
 
-        //     if (ValueChanged.HasDelegate)
-        //     {
-        //         await ValueChanged.InvokeAsync();
-        //     }
-        // }
+            if (ValueChanged.HasDelegate)
+            {
+                await ValueChanged.InvokeAsync();
+            }
+        }
     }
 }

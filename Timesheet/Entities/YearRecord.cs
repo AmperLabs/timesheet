@@ -8,6 +8,7 @@ namespace Timesheet.Entities
         public string UserId { get; set; }
         public TimeSpan? InitialOvertimeHours { get; set; }
 
+        public int? VacationEntitlement { get; set; }
         public static string GenerateKey(int year, string userId)
         {
             var normalizedUserId = userId.NormalizeEmail();
