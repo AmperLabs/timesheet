@@ -6,12 +6,12 @@
 
 @if(_year != null)
 {
-    <FluentTabs Orientation="Orientation.Horizontal" ActiveTabId="tab_overview">
+    <FluentTabs Orientation="Orientation.Horizontal" @bind-ActiveTabId=_activeTabId>
         <FluentTab Label="Buchungen" Id="tab_overview">
             <table>
                 <tr>
                     <td><FluentLabel Typo="Typography.Body" Weight="FontWeight.Bold">Kalenderjahr</FluentLabel></td>
-                    <td colspan="2"><FluentLabel Typo="Typography.Body" Weight="FontWeight.Normal">@($"{_calendarYear}")</FluentLabel></td>
+                        <td colspan="2"><FluentTextField ReadOnly="true" Appearance="FluentInputAppearance.Filled" Value="@($"{_calendarYear.ToString()}")" Style="width: 100%;"></FluentTextField></td>
                 </tr>
 
                 <tr>
@@ -80,27 +80,27 @@
             <table>
                 <tr>
                     <td><FluentLabel Typo="Typography.Body" Weight="FontWeight.Bold">Arbeitstage</FluentLabel></td>
-                    <td><FluentTextField ReadOnly="true" Appearance="FluentInputAppearance.Filled" Value=""></FluentTextField></td>
+                    <td><FluentTextField ReadOnly="true" Appearance="FluentInputAppearance.Filled" Value="@(_yearStatistics.NumberOfWorkdays.ToString())"></FluentTextField></td>
                 </tr>
                 <tr>
-                    <td><FluentLabel Typo="Typography.Body" Weight="FontWeight.Bold">AT mit Anwesenheit</FluentLabel></td>
-                    <td><FluentTextField ReadOnly="true" Appearance="FluentInputAppearance.Filled" Value=""></FluentTextField></td>
+                    <td><FluentLabel Typo="Typography.Body" Weight="FontWeight.Bold">AT nur vor Ort</FluentLabel></td>
+                    <td><FluentTextField ReadOnly="true" Appearance="FluentInputAppearance.Filled" Value="@(_yearStatistics.NumberOfWorkdaysInPresence.ToString())"></FluentTextField></td>
                 </tr>
                 <tr>
-                    <td><FluentLabel Typo="Typography.Body" Weight="FontWeight.Bold">AT mit Mobilarbeit</FluentLabel></td>
-                    <td><FluentTextField ReadOnly="true" Appearance="FluentInputAppearance.Filled" Value=""></FluentTextField></td>
+                    <td><FluentLabel Typo="Typography.Body" Weight="FontWeight.Bold">AT mit ant. Mobilarbeit</FluentLabel></td>
+                    <td><FluentTextField ReadOnly="true" Appearance="FluentInputAppearance.Filled" Value="@(_yearStatistics.NumberOfWorkdaysMobilePartly.ToString())"></FluentTextField></td>
                 </tr>
                 <tr>
                     <td><FluentLabel Typo="Typography.Body" Weight="FontWeight.Bold">AT nur Mobilarbeit</FluentLabel></td>
-                    <td><FluentTextField ReadOnly="true" Appearance="FluentInputAppearance.Filled" Value=""></FluentTextField></td>
+                    <td><FluentTextField ReadOnly="true" Appearance="FluentInputAppearance.Filled" Value="@(_yearStatistics.NumberOfWorkdaysMobileOnly.ToString())"></FluentTextField></td>
                 </tr>
                 <tr>
                     <td><FluentLabel Typo="Typography.Body" Weight="FontWeight.Bold">Kranktage</FluentLabel></td>
-                    <td><FluentTextField ReadOnly="true" Appearance="FluentInputAppearance.Filled" Value=""></FluentTextField></td>
+                    <td><FluentTextField ReadOnly="true" Appearance="FluentInputAppearance.Filled" Value="@(_yearStatistics.NumberOfIllnessDays.ToString())"></FluentTextField></td>
                 </tr>
                 <tr>
                     <td><FluentLabel Typo="Typography.Body" Weight="FontWeight.Bold">Feiertage</FluentLabel></td>
-                    <td><FluentTextField ReadOnly="true" Appearance="FluentInputAppearance.Filled" Value=""></FluentTextField></td>
+                    <td><FluentTextField ReadOnly="true" Appearance="FluentInputAppearance.Filled" Value="@(_yearStatistics.NumberOfVacationDays.ToString())"></FluentTextField></td>
                 </tr>
             </table>
         </FluentTab>
@@ -112,15 +112,15 @@
                 </tr>
                 <tr>
                     <td><FluentLabel Typo="Typography.Body" Weight="FontWeight.Bold">Urlaub gebucht</FluentLabel></td>
-                    <td><FluentTextField ReadOnly="true" Appearance="FluentInputAppearance.Filled" Value=""></FluentTextField></td>
+                    <td><FluentTextField ReadOnly="true" Appearance="FluentInputAppearance.Filled" Value="@(_year.NumberOfVacationDaysBooked.ToString())"></FluentTextField></td>
                 </tr>
                 <tr>
                     <td><FluentLabel Typo="Typography.Body" Weight="FontWeight.Bold">Urlaub genommen</FluentLabel></td>
-                    <td><FluentTextField ReadOnly="true" Appearance="FluentInputAppearance.Filled" Value=""></FluentTextField></td>
+                    <td><FluentTextField ReadOnly="true" Appearance="FluentInputAppearance.Filled" Value="@(_year.NumberOfVacationDaysTaken.ToString())"></FluentTextField></td>
                 </tr>
                 <tr>
                     <td><FluentLabel Typo="Typography.Body" Weight="FontWeight.Bold">Urlaub offen</FluentLabel></td>
-                    <td><FluentTextField ReadOnly="true" Appearance="FluentInputAppearance.Filled" Value=""></FluentTextField></td>
+                    <td><FluentTextField ReadOnly="true" Appearance="FluentInputAppearance.Filled" Value="@(_year.NumberOfVacationDaysNotTaken.ToString())"></FluentTextField></td>
                 </tr>
                 <tr>
                     <td></td>
@@ -154,6 +154,9 @@ else
     private string _currentUserId;
     private int _calendarYear;
     private TimesheetYear? _year;
+    private TimesheetYearStatistics _yearStatistics => new TimesheetYearStatistics(_year.BookedDays);
+
+    private string _activeTabId = "tab_overview";
 
     protected override async Task OnParametersSetAsync()
     {

@@ -1,4 +1,5 @@
-﻿<FluentTextField
+﻿@using Timesheet.Common
+<FluentTextField
     TextFieldType="TextFieldType.Text"
     ValueChanged="@ValueChanged"
     Value="@Value"
@@ -30,7 +31,7 @@
         get
         {
             return Duration.HasValue ?
-                Duration.Value.ToString((Duration.Value < TimeSpan.Zero ? "\\-" : "") + @"hh\:mm") :
+                Duration.Value.ToLongHoursString() :
                 null;
         }
     }

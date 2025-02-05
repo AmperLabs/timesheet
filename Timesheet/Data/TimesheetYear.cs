@@ -66,6 +66,30 @@ namespace Timesheet.Data
         public double? MobileWorkShare => TotalWorkingTime.TotalSeconds > 0 ? TotalMobileWork.TotalSeconds / TotalWorkingTime.TotalSeconds : null;
         public double? PresenceWorkShare => TotalWorkingTime.TotalSeconds > 0 ? TotalWorkingTimeInPresence.TotalSeconds / TotalWorkingTime.TotalSeconds : null;
 
+        public int NumberOfVacationDaysBooked
+        {
+            get
+            {
+                return BookedDays.Where(x => x.PresenceType == PresenceType.Vacation).Count();
+            }
+        }
+
+        public int NumberOfVacationDaysTaken
+        {
+            get
+            {
+                return BookedDays.Where(x => x.PresenceType == PresenceType.Vacation && x.DateTime <= DateTime.Today).Count();
+            }
+        }
+
+        public int NumberOfVacationDaysNotTaken
+        {
+            get
+            {
+                return BookedDays.Where(x => x.PresenceType == PresenceType.Vacation && x.DateTime > DateTime.Today).Count();
+            }
+        }
+
         public TimesheetYear()
         {
             Year = DateTime.Today.Year;

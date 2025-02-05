@@ -10,7 +10,7 @@
     <table>
         <tr>
             <td><FluentLabel Typo="Typography.Body" Weight="FontWeight.Bold">Kalenderwoche</FluentLabel></td>
-            <td colspan="2"><FluentLabel Typo="Typography.Body" Weight="FontWeight.Normal">@($"{_year}-{_weekNumber}")</FluentLabel></td>
+            <td colspan="2"><FluentTextField ReadOnly="true" Appearance="FluentInputAppearance.Filled" Value="@($"{_year}-{_weekNumber}")" Style="width: 100%;"></FluentTextField></td>
         </tr>
 
         <tr>

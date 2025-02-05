@@ -13,14 +13,15 @@
         <tr>
             <td><FluentLabel>Datum</FluentLabel></td>
             <td>
-                @if(IsToday)
+                <FluentTextField ReadOnly="true" Appearance="FluentInputAppearance.Filled" Value="@_formattedDate" Style="width: 100%;"></FluentTextField>
+                @* @if(IsToday)
                 {
                     <FluentLabel Weight="FontWeight.Bold" Color="Color.Accent">@_formattedDate</FluentLabel>
                 }
                 else
                 {
                     <FluentLabel>@_formattedDate</FluentLabel>
-                }            
+                } *@            
             </td>
         </tr>
         <tr>
