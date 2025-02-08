@@ -4,9 +4,12 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.CookiePolicy;
 using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.FluentUI.AspNetCore.Components;
 using System;
+using System.Reflection;
 using Timesheet.Components;
+using Timesheet.Endpoints;
 using Timesheet.Services;
 
 namespace Timesheet
@@ -35,6 +38,9 @@ namespace Timesheet
             builder.Services.AddScoped<CalendarService>();
             builder.Services.AddScoped<BunkaiService>();
             builder.Services.AddSingleton<PdfRendererService>();
+            builder.Services.AddSingleton<BlobService>();
+
+            builder.Services.AddEndpoints(Assembly.GetExecutingAssembly());
 
             var app = builder.Build();
 
@@ -47,24 +53,13 @@ namespace Timesheet
             app.UseStaticFiles();
             app.UseAntiforgery();
 
-            // Handled by environment variable in Deployment:
-            //app.UseForwardedHeaders(new ForwardedHeadersOptions
-            //{
-            //    ForwardedHeaders = ForwardedHeaders.XForwardedProto
-            //});
-
-            //app.UseCookiePolicy( new CookiePolicyOptions
-            //{
-            //    HttpOnly = HttpOnlyPolicy.Always,
-            //    MinimumSameSitePolicy = SameSiteMode.None,
-            //});
-
-            //app.UseRouting();
             app.UseAuthorization();
             app.UseAuthentication();
 
             app.MapRazorComponents<App>()
                 .AddInteractiveServerRenderMode();
+
+            app.MapEndpoints();
 
             app.MapGet("/login", async (HttpContext httpContext, string returnUrl = "/") =>
             {

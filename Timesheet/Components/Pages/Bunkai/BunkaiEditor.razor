@@ -26,6 +26,18 @@
                     @Preview
                 </FluentCard>
             </FluentTab>
+            <FluentTab Label="Images" Id="images">
+                <FluentCard style="width: 100%;">
+                    <ul>
+                        @foreach(var image in Images)
+                        {
+                            <li>
+                                <a href="api/files/@image" target="_blank">@image</a>
+                            </li>
+                        }
+                    </ul>
+                </FluentCard>
+            </FluentTab>
         </FluentTabs>        
                
     </FluentStack>
@@ -50,6 +62,9 @@
     [Inject]
     public BunkaiService BunkaiService { get; set; }
 
+    [Inject]
+    public BlobService BlobService { get; set; }
+
     [CascadingParameter]
     public FluentDialog? Dialog { get; set; }
 
@@ -60,12 +75,26 @@
 
     private MarkupString Preview => (MarkupString)Markdig.Markdown.ToHtml(Content.Description ?? "");
 
-    protected override void OnParametersSet()
+    private List<string> Images = new List<string>();
+
+    // protected override void OnParametersSet()
+    // {
+    //     if(Content == null)
+    //     {
+    //         Content = new Bunkai();
+    //     }
+
+
+    // }
+
+    protected override async Task OnParametersSetAsync()
     {
-        if(Content == null)
+        if (Content == null)
         {
             Content = new Bunkai();
         }
+
+        await GetImageList();
     }
 
     private async Task Save()
@@ -81,5 +110,10 @@
     private async Task Cancel()
     {
         await Dialog.CancelAsync();
+    }
+
+    private async Task GetImageList()
+    {
+        Images = await BlobService.ListFiles();
     }
 }
