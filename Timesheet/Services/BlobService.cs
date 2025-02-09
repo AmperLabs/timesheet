@@ -8,11 +8,11 @@ namespace Timesheet.Services
         private BlobServiceClient _blobServiceClient;
         private string _containerName;
 
-        public BlobService()
+        public BlobService(IConfiguration configuration)
         {
-            var cn = "";
+            var connectionString = configuration["BlobService:ConnectionString"];
 
-            _blobServiceClient = new BlobServiceClient(cn);
+            _blobServiceClient = new BlobServiceClient(connectionString);
             _containerName = "images";
         }
 
