@@ -22,8 +22,15 @@
 
 <FluentPaginator State="@Pagination" />
 
+<FluentDataGrid Items="@KataList"
+                TGridItem="Kata"
+                HeaderCellAsButtonWithMenu="true" >
+    <PropertyColumn Title="Kata" Property="@(c => c.Name)" Sortable="true" />
+</FluentDataGrid>
+
 <AuthorizeView Roles="bunkai-editor">
     <Authorized>
+        <FluentButton OnClick="OnAddKata">Add Kata</FluentButton>
         <FluentButton OnClick="OnAddBunkai">Add Bunkai</FluentButton>
     </Authorized>
 </AuthorizeView>
@@ -37,6 +44,8 @@
 
     private IQueryable<Bunkai>? BunkaiList = null;
 
+    private IQueryable<Kata>? KataList = null;
+
     private PaginationState Pagination = new PaginationState { ItemsPerPage = 10 };
 
     private GridSort<Bunkai> KataNameSort = GridSort<Bunkai>
@@ -49,7 +58,7 @@
 
     private async Task LoadBunkaiList()
     {
-        BunkaiList = (await BunkaiService.GetAll()).AsQueryable();
+        BunkaiList = (await BunkaiService.GetBunkais()).AsQueryable();
     }
 
     private async Task OnAddBunkai()
@@ -73,6 +82,34 @@
         if(!result.Cancelled)
         {
             await LoadBunkaiList();
+        }
+    }
+
+    private async Task LoadKataList()
+    {
+        KataList = (await BunkaiService.GetKatas()).AsQueryable();
+    }
+        
+    private async Task OnAddKata()
+    {
+        var kataName = string.Empty;
+        var dialogInstance = await DialogService.ShowDialogAsync(@<div>
+        <FluentTextField @bind-Value=kataName Label="Enter Kata Name:" />
+    </div>
+    , new DialogParameters
+    {
+        Title = "Add Kata",
+    });
+
+        var result = await dialogInstance.Result;
+        if (!result.Cancelled)
+        {
+            await BunkaiService.CreateOrUpdateKata(new Kata
+            {
+                Name = kataName
+            });
+
+            await LoadKataList();
         }
     }
 }

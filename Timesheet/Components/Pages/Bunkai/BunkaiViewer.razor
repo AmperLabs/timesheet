@@ -73,7 +73,7 @@ else
 
     private async Task LoadBunkai()
     {
-        Bunkai = await BunkaiService.GetByKataName(KataName);
+        Bunkai = await BunkaiService.GetBunkaiByKataName(KataName);
 
         var pipeline = new MarkdownPipelineBuilder()
             .UseAutoLinks(new Markdig.Extensions.AutoLinks.AutoLinkOptions { OpenInNewWindow = true })
@@ -138,7 +138,7 @@ else
 
         if(!result.Cancelled)
         {
-            await BunkaiService.DeleteById(Bunkai.Id);
+            await BunkaiService.DeleteBunkaiById(Bunkai.Id);
 
             NavigationManager.NavigateTo("bunkai");
         }
