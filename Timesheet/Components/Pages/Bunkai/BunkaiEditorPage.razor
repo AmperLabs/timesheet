@@ -1,0 +1,61 @@
+﻿@page "/bunkai/edit"
+@using Timesheet.Services
+
+@rendermode InteractiveServer
+<FluentBreadcrumb>
+    <FluentBreadcrumbItem Href="bunkai">
+        Bunkai
+    </FluentBreadcrumbItem>
+    <FluentBreadcrumbItem>
+        Edit
+    </FluentBreadcrumbItem>
+</FluentBreadcrumb>
+
+<FluentGrid>
+    <FluentGridItem xs="12" sm="12" >
+        <FluentStack Orientation="Orientation.Vertical">
+            <FluentSplitter Orientation="Orientation.Horizontal" Collapsed="@_hidePreview" BarHandle="false" BarSize="4" Panel1Size="50%" Panel2Size="50%" Panel1MinSize="50%" Panel2MinSize="50%" Style="width: 100%;" >
+                <Panel1>
+                    <FluentCard style="width: 100%;">
+                        <FluentToolbar>
+                            <FluentButton IconEnd="@(new Icons.Regular.Size16.Document())" Title="New" OnClick="@OnNewTemplate" />
+                            <FluentButton IconEnd="@(new Icons.Regular.Size16.Image())" Title="Insert image" />
+                            <FluentSwitch CheckedMessage="Show Preview" UncheckedMessage="Hide Preview" @bind-Value=_hidePreview Slot="end" />
+                        </FluentToolbar>
+                        <FluentTextArea @bind-Value=_content Label="Description" style="width: 100%;" Resize="TextAreaResize.Vertical" Rows="25"></FluentTextArea>
+                    </FluentCard>
+                </Panel1>
+                <Panel2>
+                    <FluentCard style="width: 100%;">
+                        @_preview
+                    </FluentCard>
+                </Panel2>
+            </FluentSplitter>
+        </FluentStack>
+    </FluentGridItem>
+</FluentGrid>
+
+
+@code {
+    [Inject]
+    public BunkaiService BunkaiService { get; set; }
+
+    [Inject]
+    public BlobService BlobService { get; set; }
+
+    [CascadingParameter]
+    public FluentDialog? Dialog { get; set; }
+
+    [Parameter]
+    public string? Id { get; set; }
+
+    private bool _hidePreview = false;
+    private string? _content;
+
+    private MarkupString _preview => (MarkupString)Markdig.Markdown.ToHtml(_content ?? "");
+
+    private void OnNewTemplate()
+    {
+        _content = "# New <Kata-Name>\n\n## Sequence 1\n\n<Description>\n\n- Tori: <Techniques>\n- Uke: <Techniques>\n";
+    }
+}

@@ -1,4 +1,4 @@
-﻿@page "/bunkai/{kataName}"
+﻿@page "/bunkai/view/{kataName}"
 
 @using Markdig
 @using Timesheet.Common
@@ -23,6 +23,7 @@
         <AuthorizeView Roles="bunkai-editor">
             <Authorized>
                 <FluentButton IconEnd="@(new Icons.Regular.Size16.Edit())" Title="Edit" OnClick="@OnEditBunkai" Disabled="@(!CanEdit)" />
+                <FluentButton IconEnd="@(new Icons.Regular.Size16.Alert())" Title="Test edit" OnClick="@OnEditBunkaiNew" Disabled="@(!CanEdit)" />
                 <FluentButton IconEnd="@(new Icons.Regular.Size16.Delete())" Title="Edit" OnClick="@OnDeleteBunkai" Disabled="@(!CanEdit)" />
             </Authorized>
         </AuthorizeView>
@@ -141,5 +142,10 @@ else
 
             NavigationManager.NavigateTo("bunkai");
         }
+    }
+
+    private async Task OnEditBunkaiNew()
+    {
+        NavigationManager.NavigateTo("/bunkai/edit");
     }
 }
