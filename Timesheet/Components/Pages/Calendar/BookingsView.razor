@@ -1,0 +1,183 @@
+﻿@using System.Globalization
+@using Timesheet.Common
+@using Timesheet.Data
+@using Timesheet.Services
+@inject CalendarService CalendarService
+
+@rendermode InteractiveServer
+
+<FluentDataGrid Items="@_filteredItems"
+                ResizableColumns="true"
+                ResizeType="DataGridResizeType.Discrete"
+                HeaderCellAsButtonWithMenu="true"
+                Pagination="@_pagination"
+    >
+    <PropertyColumn Title="Monat" Property="@(c => _culture.DateTimeFormat.GetMonthName(c.DateTime.Month))" Filtered="!string.IsNullOrWhiteSpace(_monthFilter)" Sortable="true" >
+        <ColumnOptions>
+            <div style="min-width: 250px; width: 100%;">
+                <FluentSearch Autofocus=true @bind-Value=_monthFilter @oninput="HandleMonthFilter" @bind-Value:after="ClearMonthFilter" Placeholder="Monat..." Style="width: 100%;" Label="Filter" />
+            </div>
+        </ColumnOptions>
+    </PropertyColumn>
+    <PropertyColumn Title="Datum" Property="@(c => c.DateTime)" Format="@(_culture.DateTimeFormat.ShortDatePattern)" Sortable="true" />
+    <PropertyColumn Title="Typ" Property="@(c => GetPresenceCaption(c.PresenceType))" Filtered="!string.IsNullOrWhiteSpace(_presenceFilter)" Sortable="true">
+        <ColumnOptions>
+            <div style="min-width: 250px; width: 100%;">
+                <FluentSearch Autofocus=true @bind-Value=_presenceFilter @oninput="HandlePresenceFilter" @bind-Value:after="ClearPresenceFilter" Placeholder="Typ..." Style="width: 100%;" Label="Filter" />
+            </div>
+        </ColumnOptions>
+    </PropertyColumn>
+    <PropertyColumn Title="Vor Ort" Property="@(c => c.GrossWorkingTimeInPresence)" />
+    <PropertyColumn Title="Ant. Mobil" Property="@(c => c.PartlyMobileWork)" />
+    <PropertyColumn Title="Nur Mobil" Property="@(c => c.PresenceType == PresenceType.MobileOnly ? c.FullyMobileWork.ToString() : string.Empty)" />
+    <TemplateColumn Title="Gesamt">
+        <FluentStack Orientation="Orientation.Horizontal">
+            <FluentLabel>@(context!.TotalWorkingTime)</FluentLabel>
+            @if (context.TotalWorkingTime <= context.MaximumDailyWorkingTime)
+            {
+                <FluentIcon Value="@(new Icons.Regular.Size16.CheckmarkCircle())" Color="@Color.Success" />
+            }
+            else
+            {
+                <FluentIcon Value="@(new Icons.Regular.Size16.ErrorCircle())" Color="@Color.Error" />
+            }
+        </FluentStack>
+    </TemplateColumn>
+    <TemplateColumn Title="Überstunden">
+        <FluentStack Orientation="Orientation.Horizontal">
+            <FluentLabel>@(context!.OvertimeHours)</FluentLabel>
+            @if(context.OvertimeHours >= TimeSpan.Zero)
+            {
+                <FluentIcon Value="@(new Icons.Regular.Size16.CheckmarkCircle())" Color="@Color.Success" />
+            }
+            else
+            {
+                <FluentIcon Value="@(new Icons.Regular.Size16.ErrorCircle())" Color="@Color.Error" />
+            }            
+        </FluentStack>        
+    </TemplateColumn>
+</FluentDataGrid>
+
+<FluentPaginator State="@_pagination" />
+
+@code {
+    [CascadingParameter]
+    private Task<AuthenticationState>? authenticationState { get; set; }
+
+    [Parameter]
+    public int? Year { get; set; }
+
+    private string _currentUserId { get; set; }
+
+    private IQueryable<TimesheetDay>? _bookings;
+
+    private CultureInfo _culture = new CultureInfo("de-DE");
+
+    PaginationState _pagination = new PaginationState { ItemsPerPage = 25 };
+
+    
+
+    private IQueryable<TimesheetDay> _filteredItems
+    {
+        get
+        {
+            var result = _bookings;
+
+            if (result is not null && !string.IsNullOrEmpty(_monthFilter))
+            {
+                result = result.Where(x => _culture.DateTimeFormat.GetMonthName(x.DateTime.Month).Contains(_monthFilter, StringComparison.InvariantCultureIgnoreCase));
+            }
+
+            if (result is not null && !string.IsNullOrEmpty(_presenceFilter))
+            {
+                result = result.Where(x => GetPresenceCaption(x.PresenceType).Contains(_presenceFilter, StringComparison.InvariantCultureIgnoreCase));
+            }
+
+            return result;
+        }
+    }
+
+    
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (authenticationState is not null)
+        {
+            var state = await authenticationState;
+            _currentUserId = state.GetEmailForAuthenticatedUser();
+        }
+
+
+        await LoadBookings();
+    }
+
+    private async Task LoadBookings()
+    {
+        if (!Year.HasValue)
+            return;
+
+        var from = new DateTime(Year.Value, 1, 1);
+        var to = new DateTime(Year.Value, 12, 31);
+        var bookings = await CalendarService.GetTimesheetDaysByDateRange(from, to, _currentUserId);
+
+        _bookings = bookings.OrderBy(x => x.DateTime).AsQueryable();
+    }
+
+    private string GetPresenceCaption(PresenceType presence)
+    {
+        switch (presence)
+        {
+            case PresenceType.PresenceOnly:
+                return "Nur vor Ort";
+            case PresenceType.MobilePartly:
+                return "Anteilig Mobil";
+            case PresenceType.MobileOnly:
+                return "Nur Mobil";
+            case PresenceType.Vacation:
+                return "Urlaub";
+            case PresenceType.PublicHoliday:
+                return "Feiertag";
+            case PresenceType.Illness:
+                return "Krank";
+            default:
+                return "";
+        }
+    }
+
+
+    private string _monthFilter = string.Empty;
+    private void HandleMonthFilter(ChangeEventArgs args)
+    {
+        if (args.Value is string value)
+        {
+            _monthFilter = value;
+        }
+    }
+
+    private void ClearMonthFilter()
+    {
+        if (string.IsNullOrWhiteSpace(_monthFilter))
+        {
+            _monthFilter = string.Empty;
+        }
+    }
+
+
+    private string _presenceFilter = string.Empty;
+    private void HandlePresenceFilter(ChangeEventArgs args)
+    {
+        if (args.Value is string value)
+        {
+            _presenceFilter = value;
+        }
+    }
+
+    private void ClearPresenceFilter()
+    {
+        if (string.IsNullOrWhiteSpace(_monthFilter))
+        {
+            _presenceFilter = string.Empty;
+        }
+    }
+
+}

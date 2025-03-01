@@ -49,7 +49,7 @@
 
         <tr>
             <td><FluentLabel Typo="Typography.Body" Weight="FontWeight.Bold">Ungebuchte Mobilarbeit</FluentLabel></td>
-            <td colspan="2"><DurationDisplay Duration="@_week.UnbookedMobileWork" ReadOnly="true" Style="width: 100%;" /></td>
+            <td colspan="2"><DurationDisplay Duration="@_week.UnbookedMobileWork" ReadOnly="true" Style="width: 100%;" Icon="@_unbookedMobileWorkIcon" IconColor="@_unbookedMobileWorkColor" /></td>
         </tr>
 
         
@@ -80,6 +80,10 @@ else
 
     [Parameter]
     public EventCallback ValueChanged { get; set; }
+
+    private Icon _unbookedMobileWorkIcon => _week.UnbookedMobileWork == TimeSpan.Zero ? new Icons.Regular.Size16.CheckmarkCircle() : new Icons.Regular.Size16.ErrorCircle();
+
+    private Color _unbookedMobileWorkColor => _week.UnbookedMobileWork == TimeSpan.Zero ? Color.Success : Color.Error;
 
     private string _currentUserId { get; set; }
 

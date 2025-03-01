@@ -1,4 +1,5 @@
 ﻿@page "/bunkai/edit"
+@using Timesheet.Entities
 @using Timesheet.Services
 
 @rendermode InteractiveServer
@@ -18,11 +19,41 @@
                 <Panel1>
                     <FluentCard style="width: 100%;">
                         <FluentToolbar>
+                            <FluentButton IconEnd="@(new Icons.Regular.Size16.Save())" Title="Save" OnClick="@OnSaveBunkai" />
                             <FluentButton IconEnd="@(new Icons.Regular.Size16.Document())" Title="New" OnClick="@OnNewTemplate" />
                             <FluentButton IconEnd="@(new Icons.Regular.Size16.Image())" Title="Insert image" />
                             <FluentSwitch CheckedMessage="Show Preview" UncheckedMessage="Hide Preview" @bind-Value=_hidePreview Slot="end" />
                         </FluentToolbar>
-                        <FluentTextArea @bind-Value=_content Label="Description" style="width: 100%;" Resize="TextAreaResize.Vertical" Rows="25"></FluentTextArea>
+
+                        <FluentStack Orientation="Orientation.Vertical">
+                            <FluentSelect TOption="Kata"
+                                          Items="@_katas"
+                                          OptionValue="@(k => k.Id)"
+                                          OptionText="@(k => k.Name)"
+                                          @bind-SelectedOption="@_selectedKata"
+                                          Width="150px" />
+
+                            <FluentStack Orientation="Orientation.Horizontal">
+                                <FluentTextField Placeholder="Titel" @bind-Value=_sequence.Title Style="width: 100%" />
+                                <FluentButton IconEnd="@(new Icons.Regular.Size16.ArrowClockwise())" Title="Generate title" />
+                            </FluentStack>
+                            
+                            <FluentTextArea @bind-Value=_sequence.Description Label="Description" style="width: 100%;" Resize="TextAreaResize.Vertical" Rows="5"></FluentTextArea>
+                        
+                            @for (int i = 0; i < _sequence.Actions.Count; i++)
+                            {
+                                var currentIndex = i;
+                                @* <div style="display:flex; flex-direction: row; justify-content: space-between; align-items: flex-start"> *@
+                                <FluentStack Orientation="Orientation.Horizontal">
+                                    <BunkaiActionEditor @bind-Action=@(_sequence.Actions[currentIndex]) />
+                                    <FluentButton IconEnd="@(new Icons.Regular.Size16.Delete())" Title="Delete" OnClick="@(() => OnDeleteAction(currentIndex))" />
+                                </FluentStack>
+                                @* </div> *@
+                            }
+
+                            <FluentButton IconEnd="@(new Icons.Regular.Size16.Add())" Title="Add" OnClick="@OnAddAction" />
+                        </FluentStack>
+
                     </FluentCard>
                 </Panel1>
                 <Panel2>
@@ -49,13 +80,73 @@
     [Parameter]
     public string? Id { get; set; }
 
-    private bool _hidePreview = false;
-    private string? _content;
+    private BunkaiSequenceRenderer _renderer = new BunkaiSequenceRenderer();
 
-    private MarkupString _preview => (MarkupString)Markdig.Markdown.ToHtml(_content ?? "");
+    private bool _hidePreview = false;
+
+    private MarkupString _preview => (MarkupString)Markdig.Markdown.ToHtml(_renderer.RenderAsMarkdown(_sequence) ?? "");
+
+    private List<Kata> _katas = new List<Kata>();
+    private Kata? _selectedKata
+    {
+        get => _katas.Where(x => x.Id == _sequence.KataId).FirstOrDefault();
+        set
+        {
+            _sequence.KataId = value.Id;
+        }
+    }
+    private BunkaiSequence _sequence;
 
     private void OnNewTemplate()
     {
-        _content = "# New <Kata-Name>\n\n## Sequence 1\n\n<Description>\n\n- Tori: <Techniques>\n- Uke: <Techniques>\n";
+        _sequence.Description = "# New <Kata-Name>\n\n## Sequence 1\n\n<Description>\n\n- Tori: <Techniques>\n- Uke: <Techniques>\n";
+    }
+
+    private void OnDeleteAction(int index)
+    {
+        //var index = _actions.IndexOf(action);
+        if (index >= 0 && index < _sequence.Actions.Count)
+        {
+            _sequence.Actions.RemoveAt(index);
+        }
+    }
+
+    private void OnAddAction()
+    {
+        _sequence.Actions.Add(new BunkaiAction { Actor = BunkaiActor.Tori, Action = "Neue Action" });
+    }
+
+    private void OnSaveBunkai()
+    {
+
+        Console.WriteLine(_sequence);
+        // TODO: Sequenz speichern
+    }
+
+    //private List<BunkaiAction> _actions = new List<BunkaiAction>();
+
+
+    protected override async Task OnParametersSetAsync()
+    {
+        _katas = await BunkaiService.GetKatas();
+
+
+        _sequence = new BunkaiSequence
+        {
+        };
+
+        _sequence.Actions = new List<BunkaiAction>();
+
+        _sequence.Actions.Add(new BunkaiAction
+            {
+                Actor = BunkaiActor.Tori,
+                Action = "Hau ihn"
+            });
+
+        _sequence.Actions.Add(new BunkaiAction
+            {
+                Actor = BunkaiActor.Uke,
+                Action = "Geh zurück"
+            });
     }
 }

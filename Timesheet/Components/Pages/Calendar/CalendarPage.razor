@@ -1,4 +1,4 @@
-﻿@page "/calendar"
+﻿@page "/timesheet"
 @using System.Globalization
 @using Timesheet.Common
 @using Timesheet.Data
@@ -78,6 +78,17 @@
                         <YearView Date="@SelectedDay" />
                     }
                 </FluentCard>
+            </FluentGridItem>
+        
+            <FluentGridItem sm="12" md="12" lg="12" xl="12">
+                <FluentCard>
+                    <CardHeader Title="Zeitbuchungen" />
+                    @if (SelectedDay != null)
+                    {
+                        <BookingsView Year="@(SelectedDay.Value.Year)" />
+                    }
+                </FluentCard>
+                
             </FluentGridItem>
         </FluentGrid>
     </Authorized>

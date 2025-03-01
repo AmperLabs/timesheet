@@ -1,0 +1,49 @@
+﻿@using Timesheet.Entities
+
+<FluentStack Orientation="Orientation.Horizontal">
+    <FluentSelect TOption="BunkaiActor"
+                  Items="@_actors"
+                  OptionValue="@(p => p.ToString())"
+                  @bind-SelectedOption="@SelectedActor"
+                  Width="150px" />
+
+    <FluentTextArea @bind-Value=SelectedAction Style="width: 100%; margin-right: 10px" />
+</FluentStack>
+
+@code {
+    [Parameter]
+    public BunkaiAction Action { get; set; }
+
+    [Parameter]
+    public EventCallback<BunkaiAction?> ActionChanged { get; set; }
+
+    private BunkaiActor SelectedActor
+    {
+        get => Action.Actor;
+        set
+        {
+            if(value != Action.Actor)
+            {
+                Action.Actor = value;
+
+                ActionChanged.InvokeAsync(Action);
+            }
+        }
+    }
+
+    private string SelectedAction
+    {
+        get => Action.Action;
+        set
+        {
+            if(value != Action.Action)
+            {
+                Action.Action = value;
+
+                ActionChanged.InvokeAsync(Action);
+            }
+        }
+    }
+
+    private List<BunkaiActor> _actors => new List<BunkaiActor> { BunkaiActor.Tori, BunkaiActor.Uke };
+}
