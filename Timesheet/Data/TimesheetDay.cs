@@ -199,7 +199,7 @@ namespace Timesheet.Data
             }
         }
 
-        public TimeSpan? OvertimeHours
+        public TimeSpan OvertimeHours
         {
             get
             {
@@ -208,7 +208,7 @@ namespace Timesheet.Data
                     case PresenceType.PresenceOnly:
                     case PresenceType.MobilePartly:
                     case PresenceType.MobileOnly:
-                        return TotalWorkingTime - DailyRegularWorkingTime;
+                        return (TotalWorkingTime ?? TimeSpan.Zero) - DailyRegularWorkingTime;
                     case PresenceType.Illness:
                         return TimeSpan.Zero - DailyRegularWorkingTime;
                     case PresenceType.Vacation:

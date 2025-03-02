@@ -48,13 +48,15 @@
     {
         get
         {
-            return Duration.HasValue ?
+            var value = Duration.HasValue ?
                 Duration.Value.ToLongHoursString() :
                 null;
+
+            return value;
         }
     }
 
-    private string timePattern = @"(\d+):([0-5][0-9])";
+    private string timePattern = @"([\-]?\d+):([0-5][0-9])";
 
     private async Task ValueChanged(string value)
     {
@@ -74,7 +76,7 @@
         {
             Duration = null;            
         }   
-        
+
         await DurationChanged.InvokeAsync(Duration);
     }
 }

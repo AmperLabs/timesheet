@@ -7,8 +7,21 @@
                   @bind-SelectedOption="@SelectedActor"
                   Width="150px" />
 
-    <FluentTextArea @bind-Value=SelectedAction Style="width: 100%; margin-right: 10px" />
+    <FluentTextArea Id="@_textAreaId" @bind-Value=SelectedAction Style="width: 100%; margin-right: 10px" />
 </FluentStack>
+
+<FluentMenu Anchor="@_textAreaId" Trigger="MouseButton.Right">
+    <FluentMenuItem Label="Option 1" />
+
+    <FluentMenuItem Label="Option 2">
+        <MenuItems>
+            <FluentMenuItem Label="Option 2.1" />
+            <FluentMenuItem Label="Option 2.2" />
+        </MenuItems>
+    </FluentMenuItem>
+
+    <FluentMenuItem Label="Option 3" />
+</FluentMenu>
 
 @code {
     [Parameter]
@@ -16,6 +29,8 @@
 
     [Parameter]
     public EventCallback<BunkaiAction?> ActionChanged { get; set; }
+
+    private string _textAreaId = string.Empty;
 
     private BunkaiActor SelectedActor
     {
@@ -46,4 +61,9 @@
     }
 
     private List<BunkaiActor> _actors => new List<BunkaiActor> { BunkaiActor.Tori, BunkaiActor.Uke };
+
+    protected override void OnInitialized()
+    {
+        _textAreaId = $"bunkaiactioneditor_{Guid.NewGuid().ToString("n")}";
+    }
 }

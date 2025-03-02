@@ -15,7 +15,12 @@
     <PropertyColumn Title="Monat" Property="@(c => _culture.DateTimeFormat.GetMonthName(c.DateTime.Month))" Filtered="!string.IsNullOrWhiteSpace(_monthFilter)" Sortable="true" >
         <ColumnOptions>
             <div style="min-width: 250px; width: 100%;">
-                <FluentSearch Autofocus=true @bind-Value=_monthFilter @oninput="HandleMonthFilter" @bind-Value:after="ClearMonthFilter" Placeholder="Monat..." Style="width: 100%;" Label="Filter" />
+                @* <FluentSearch Autofocus=true @bind-Value=_monthFilter @oninput="HandleMonthFilter" @bind-Value:after="ClearMonthFilter" Placeholder="Monat..." Style="width: 100%;" Label="Filter" /> *@
+                <FluentSelect Items="@_monthOptions"
+                              OptionText="@(x => x.Text)"
+                              OptionValue="@(x => x.Value)"
+                              @bind-Value=_monthFilter
+                              Multiple="false" />
             </div>
         </ColumnOptions>
     </PropertyColumn>
@@ -23,16 +28,24 @@
     <PropertyColumn Title="Typ" Property="@(c => GetPresenceCaption(c.PresenceType))" Filtered="!string.IsNullOrWhiteSpace(_presenceFilter)" Sortable="true">
         <ColumnOptions>
             <div style="min-width: 250px; width: 100%;">
-                <FluentSearch Autofocus=true @bind-Value=_presenceFilter @oninput="HandlePresenceFilter" @bind-Value:after="ClearPresenceFilter" Placeholder="Typ..." Style="width: 100%;" Label="Filter" />
+                <FluentSelect Items="@_presenceOptions"
+                              OptionText="@(x => x.Text)"
+                              OptionValue="@(x => x.Value)"
+                              @bind-Value=_presenceFilter
+                              Multiple="false" />
             </div>
         </ColumnOptions>
     </PropertyColumn>
-    <PropertyColumn Title="Vor Ort" Property="@(c => c.GrossWorkingTimeInPresence)" />
-    <PropertyColumn Title="Ant. Mobil" Property="@(c => c.PartlyMobileWork)" />
-    <PropertyColumn Title="Nur Mobil" Property="@(c => c.PresenceType == PresenceType.MobileOnly ? c.FullyMobileWork.ToString() : string.Empty)" />
+    <PropertyColumn Title="Kommen" Property="@(c => c.StartOfWork)" Format="HH:mm" />
+    <PropertyColumn Title="Gehen" Property="@(c => c.EndOfWork)" Format="HH:mm" />
+    <PropertyColumn Title="Vor Ort" Property="@(c => c.GrossWorkingTimeInPresence)" Format="hh\:mm" />
+    <PropertyColumn Title="Pause" Property="@(c => c.BreakTime > TimeSpan.Zero ? c.BreakTime.Value.ToString(@"hh\:mm") : string.Empty )" />
+    <PropertyColumn Title="Netto AZ" Property="@(c => c.NetWorkingTimeInPresence)" Format="hh\:mm" />
+    <PropertyColumn Title="Ant. Mobil" Property="@(c => c.PartlyMobileWork)" Format="hh\:mm" />
+    <PropertyColumn Title="Nur Mobil" Property="@(c => c.PresenceType == PresenceType.MobileOnly ? c.FullyMobileWork.ToString(@"hh\:mm") : string.Empty)" />
     <TemplateColumn Title="Gesamt">
         <FluentStack Orientation="Orientation.Horizontal">
-            <FluentLabel>@(context!.TotalWorkingTime)</FluentLabel>
+            <FluentLabel>@(context!.TotalWorkingTime?.ToLongHoursString())</FluentLabel>
             @if (context.TotalWorkingTime <= context.MaximumDailyWorkingTime)
             {
                 <FluentIcon Value="@(new Icons.Regular.Size16.CheckmarkCircle())" Color="@Color.Success" />
@@ -45,7 +58,7 @@
     </TemplateColumn>
     <TemplateColumn Title="Überstunden">
         <FluentStack Orientation="Orientation.Horizontal">
-            <FluentLabel>@(context!.OvertimeHours)</FluentLabel>
+            <FluentLabel>@(context!.OvertimeHours.ToLongHoursString())</FluentLabel>
             @if(context.OvertimeHours >= TimeSpan.Zero)
             {
                 <FluentIcon Value="@(new Icons.Regular.Size16.CheckmarkCircle())" Color="@Color.Success" />
@@ -75,7 +88,7 @@
 
     PaginationState _pagination = new PaginationState { ItemsPerPage = 25 };
 
-    
+
 
     private IQueryable<TimesheetDay> _filteredItems
     {
@@ -97,7 +110,7 @@
         }
     }
 
-    
+
 
     protected override async Task OnParametersSetAsync()
     {
@@ -153,7 +166,6 @@
             _monthFilter = value;
         }
     }
-
     private void ClearMonthFilter()
     {
         if (string.IsNullOrWhiteSpace(_monthFilter))
@@ -171,7 +183,6 @@
             _presenceFilter = value;
         }
     }
-
     private void ClearPresenceFilter()
     {
         if (string.IsNullOrWhiteSpace(_monthFilter))
@@ -179,5 +190,36 @@
             _presenceFilter = string.Empty;
         }
     }
+
+    private List<Option<string>> _presenceOptions
+    {
+        get
+        {
+            var values = _bookings.Select(x => GetPresenceCaption(x.PresenceType))
+                                                    .Distinct()
+                                                    .OrderBy(x => x)
+                                                    .Select(x => new Option<string> { Text = x, Value = x })
+                                                    .ToList();
+            values.Insert(0, new Option<string> { Text = string.Empty, Value = string.Empty });
+
+            return values;
+        }
+    }
+
+    private List<Option<string>> _monthOptions
+    {
+        get
+        {
+            var values = _bookings.Select(x => x.DateTime.Month)
+                                                    .Distinct()
+                                                    .OrderBy(x => x)
+                                                    .Select(x => new Option<string> { Text = _culture.DateTimeFormat.GetMonthName(x), Value = _culture.DateTimeFormat.GetMonthName(x) })
+                                                    .ToList();
+            values.Insert(0, new Option<string> { Text = string.Empty, Value = string.Empty });
+
+            return values;
+        }
+    }
+    
 
 }

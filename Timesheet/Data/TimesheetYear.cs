@@ -54,7 +54,7 @@ namespace Timesheet.Data
         public int TotalFullyMobileWorkDays => BookedDays == null ? 0 : BookedDays.Where(x => x.PresenceType == PresenceType.MobileOnly).Count();
 
         public TimeSpan TotalWorkingTime => BookedDays == null ? TimeSpan.Zero : TimeSpan.FromSeconds(BookedDays.Where(x => x.TotalWorkingTime.HasValue).Select(x => x.TotalWorkingTime!.Value.TotalSeconds).Sum());
-        public TimeSpan OvertimeHours => BookedDays == null ? TimeSpan.Zero : TimeSpan.FromSeconds(BookedDays.Where(x => x.OvertimeHours.HasValue).Select(x => x.OvertimeHours!.Value.TotalSeconds).Sum());
+        public TimeSpan OvertimeHours => BookedDays == null ? TimeSpan.Zero : TimeSpan.FromSeconds(BookedDays.Where(x => x.OvertimeHours != null).Select(x => x.OvertimeHours.TotalSeconds).Sum());
 
         public TimeSpan TotalOvertimeHours => OvertimeHours + (InitialOvertimeHours ?? TimeSpan.Zero);
         
