@@ -151,6 +151,8 @@ namespace Timesheet.Data
                         return TimeSpan.Zero;
                     case PresenceType.Illness:
                         return TimeSpan.Zero;
+                    case PresenceType.ReduceOverhours:
+                        return TimeSpan.Zero;
                     default:
                         return null;
                 }
@@ -214,13 +216,15 @@ namespace Timesheet.Data
                     case PresenceType.Vacation:
                     case PresenceType.PublicHoliday:
                         return TimeSpan.Zero;
+                    case PresenceType.ReduceOverhours:
+                        return TimeSpan.Zero - DailyRegularWorkingTime;
                     default:
                         return TimeSpan.Zero;
                 }
             }
         }
             
-        public bool? IsMaximumDialyWorkingTimeExceeded => TotalWorkingTime > MaximumDailyWorkingTime;      
+        public bool? IsMaximumDailyWorkingTimeExceeded => TotalWorkingTime > MaximumDailyWorkingTime;      
 
         public bool IsMobileWorkAllowed
         {

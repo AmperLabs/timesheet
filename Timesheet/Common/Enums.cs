@@ -17,6 +17,8 @@ namespace Timesheet.Common
         [Description("Feiertag")]
         PublicHoliday,
         [Description("Krank")]
-        Illness
+        Illness,
+        [Description("Abbau Überstunden")]
+        ReduceOverhours
     }
 }

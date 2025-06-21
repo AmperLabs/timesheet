@@ -73,7 +73,7 @@
             <td><FluentLabel>Gesamt</FluentLabel></td>
             <td>
                 <DurationDisplay Duration="_day.TotalWorkingTime" ReadOnly="true" Style="width: 100%;" />
-                @if(_day.IsMaximumDialyWorkingTimeExceeded.HasValue && _day.IsMaximumDialyWorkingTimeExceeded.Value)
+                @if(_day.IsMaximumDailyWorkingTimeExceeded.HasValue && _day.IsMaximumDailyWorkingTimeExceeded.Value)
                 {
                     <FluentIcon Value="@(new Microsoft.FluentUI.AspNetCore.Components.Icons.Filled.Size20.ErrorCircle())" Color="@Color.Error" Title="Maximal Arbeitszeit überschritten" />
                 }
@@ -88,6 +88,10 @@
         <tr>
             <td></td>
             <td><FluentButton OnClick="@Save" Disabled="@(!_day.IsDirty)" Style="width: 100%;" >Save</FluentButton></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td><FluentButton OnClick="@Delete" Disabled="@(!_hasBooking)" Style="width: 100%;">Delete</FluentButton></td>
         </tr>
     </table>
 }
@@ -116,6 +120,7 @@ else
     private string _currentUserId { get; set; }
 
     private TimesheetDay _day;
+    private bool _hasBooking = false;
 
     private string? _formattedDate => $"{_day.Date.DayOfWeek.GetDayName(_culture)}, {_day.Date.ToString("d", _culture)}";
 
@@ -142,6 +147,8 @@ else
                 return "Feiertag";
             case PresenceType.Illness:
                 return "Krank";
+            case PresenceType.ReduceOverhours:
+                return "Abbau Überstunden";
             default:
                 return "";
         }
@@ -155,6 +162,21 @@ else
             _day.ResetDirtyFlag();
 
             if(ValueChanged.HasDelegate)
+            {
+                await ValueChanged.InvokeAsync();
+            }
+        }
+    }
+
+    private async Task Delete()
+    {
+        if(_day != null)
+        {
+            await CalendarService.DeleteTimesheetDay(_day.DateTime, _currentUserId);
+
+            _day.ResetDirtyFlag();
+
+            if (ValueChanged.HasDelegate)
             {
                 await ValueChanged.InvokeAsync();
             }
@@ -175,10 +197,12 @@ else
         {
             booking.ResetDirtyFlag();
             _day = booking;
+            _hasBooking = true;
         }
         else
         {
             _day = TimesheetDay.FromDateTime(Date);
+            _hasBooking = false;
         }
     }
 }

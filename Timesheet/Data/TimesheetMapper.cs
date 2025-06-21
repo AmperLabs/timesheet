@@ -10,7 +10,7 @@ namespace Timesheet.Data
         [MapperIgnoreSource(nameof(TimesheetDay.NetWorkingTimeInPresence))]
         [MapperIgnoreSource(nameof(TimesheetDay.TotalWorkingTime))]
         [MapperIgnoreSource(nameof(TimesheetDay.OvertimeHours))]
-        [MapperIgnoreSource(nameof(TimesheetDay.IsMaximumDialyWorkingTimeExceeded))]
+        [MapperIgnoreSource(nameof(TimesheetDay.IsMaximumDailyWorkingTimeExceeded))]
         [MapperIgnoreTarget(nameof(DayRecord.Id))]
         public partial DayRecord TimesheetDayToDayRecord(TimesheetDay timesheetDay);
 
